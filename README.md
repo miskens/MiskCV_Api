@@ -107,7 +107,7 @@ According to the [Github terms](Github terms of service) other users of GitHub.c
 ## Contact
 
 Mikael Puusaari - miskens@hotmail.com
-[Linkedin]
+Linked in: [Linkedin]
 
 Project Link: [https://github.com/miskens/MiskCv_Api](https://github.com/miskens/MiskCv_Api)
 
