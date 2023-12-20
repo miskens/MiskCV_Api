@@ -20,7 +20,7 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![LinkedIn][linkedin-shield]][linkedin]
+[![LinkedIn][linkedin-shield]][Linkedin]
 
 
 
@@ -107,10 +107,9 @@ According to the [Github terms](Github terms of service) other users of GitHub.c
 ## Contact
 
 Mikael Puusaari - miskens@hotmail.com
+[Linkedin]
 
 Project Link: [https://github.com/miskens/MiskCv_Api](https://github.com/miskens/MiskCv_Api)
-
-[linkedin] Linked in
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -138,7 +137,7 @@ Project Link: [https://github.com/miskens/MiskCv_Api](https://github.com/miskens
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/miskens/MiskCv_Api/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin]: https://linkedin.com/in/](https://www.linkedin.com/in/mikael-puusaari-05736959/
+[Linkedin]: https://linkedin.com/in/](https://www.linkedin.com/in/mikael-puusaari-05736959/
 [Github terms]: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
 
 
