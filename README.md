@@ -20,7 +20,6 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -104,7 +103,7 @@ Don't forget to give the project a star! Thanks again!
 
 No license. Use as you wish.
 
-According to the [https://docs.github.com/en/site-policy/github-terms/github-terms-of-service](Github terms of service) other users of GitHub.com have the right to view and fork your repository.
+According to the [Githubterms-url](Github terms of service) other users of GitHub.com have the right to view and fork your repository.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -142,9 +141,8 @@ Project Link: [https://github.com/miskens/MiskCv_Api](https://github.com/miskens
 [stars-url]: https://github.com/miskens/MiskCv_Api/stargazers
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/miskens/MiskCv_Api/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/miskens/MiskCv_Api/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/](https://www.linkedin.com/in/mikael-puusaari-05736959/
-[React-url]: https://reactjs.org/
+[Githubterms-url]: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
+
 
