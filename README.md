@@ -42,7 +42,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This is just a personal project where I create my CV as well as practice my my skills as well as get something to show employers a bit of my experience and hopefully run into problems and issues that I can learn from while keeping my skills sharp.
+This is just a personal project where I create my CV and practice my skills and hopefully run into problems and issues that I can learn from while keeping my skills sharp.
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
