@@ -97,7 +97,7 @@ Don't forget to give the project a star! Thanks again!
 
 No license. Use as you wish.
 
-According to the [Github terms](Github terms of service) other users of GitHub.com have the right to view and fork your repository.
+According to the [!Github-terms-url] Github terms](Github terms of service) other users of GitHub.com have the right to view and fork your repository.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -109,6 +109,8 @@ According to the [Github terms](Github terms of service) other users of GitHub.c
 Mikael Puusaari - miskens@hotmail.com
 
 Project Link: [https://github.com/miskens/MiskCv_Api](https://github.com/miskens/MiskCv_Api)
+
+[![linkedin-url]Linked in]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -137,6 +139,6 @@ Project Link: [https://github.com/miskens/MiskCv_Api](https://github.com/miskens
 [issues-url]: https://github.com/miskens/MiskCv_Api/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/](https://www.linkedin.com/in/mikael-puusaari-05736959/
-[Github terms]: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
+[Github-terms-url]: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
 
 
