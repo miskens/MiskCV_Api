@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Models\Address.cs~RFca5e83c.TMP" />
     <None Remove="Models\Skill.cs~RF662014c.TMP" />
     <None Remove="Models\User.cs~RF66327ca.TMP" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiskCv_Api.Models;
 
@@ -8,6 +9,7 @@ public partial class Company
 {
     [Key]
     [Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     [Required]
@@ -25,5 +27,5 @@ public partial class Company
     [Required]
     public int SkillsId { get; set; }
 
-    public int? Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 }

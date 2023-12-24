@@ -24,7 +24,7 @@ namespace MiskCv_Api
 
             builder.Services.AddDbContext<MiskCvDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("MiskCvDbConnString"));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("MiskCvDbTEMPConnString"));
             });
 
             var app = builder.Build();

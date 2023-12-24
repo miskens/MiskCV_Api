@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
+using MiskCv_Api.Dtos;
 using MiskCv_Api.Models;
 
 namespace MiskCv_Api.Controllers
@@ -25,12 +28,18 @@ namespace MiskCv_Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
+            if (_context.User == null)
+            {
+                return NotFound();
+            }
+
             var users = await _context.User.ToListAsync();
 
-          if (users.Count <=0 || users == null)
-          {
-              return NotFound();
-          }
+            if (users.Count < 0 || users == null)
+            {
+                return NotFound();
+            }
+
             return users;
         }
 
@@ -87,12 +96,34 @@ namespace MiskCv_Api.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(UserCreateDto userDto)
         {
-          if (_context.User == null)
-          {
-              return Problem("Entity set 'MiskCvDbContext.User'  is null.");
-          }
+            if (_context.User == null)
+            {
+                return Problem("Entity set 'MiskCvDbContext.User'  is null.");
+            }
+
+            User user = new User
+            {
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+                Username = userDto.Username,
+                DateOfBirth = userDto.DateOfBirth,
+                ImageUrl = userDto.ImageUrl,
+            };
+       
+            foreach (AddressCreateDto a in userDto.Address)
+            {
+                var add = new Address
+                {
+                    Street = a.Street,
+                    PostNr = a.PostNr,
+                    City = a.City,
+                    Country = a.Country
+                };
+                user.Address.Add(add);
+            }
+
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
