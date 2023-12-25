@@ -117,5 +117,7 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
         }
 
         #endregion
+
+        #endregion
     }
 }

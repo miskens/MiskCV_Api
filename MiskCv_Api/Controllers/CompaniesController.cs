@@ -43,11 +43,7 @@ namespace MiskCv_Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompany(int id)
         {
-          if (_context.Company == null)
-          {
-              return NotFound();
-          }
-            var company = await _context.Company.FindAsync(id);
+            var company = await _companiesRepository.GetCompany(id);
 
             if (company == null)
             {
