@@ -66,23 +66,7 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var updatedUser = await _userRepository.UpdateUser(id, user);
 
             return NoContent();
         }
@@ -144,9 +128,9 @@ namespace MiskCv_Api.Controllers
             return NoContent();
         }
 
-        private bool UserExists(int id)
-        {
-            return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        //private bool UserExists(int id)
+        //{
+        //    return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
+        //}
     }
 }

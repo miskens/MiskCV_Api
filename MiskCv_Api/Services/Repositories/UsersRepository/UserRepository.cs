@@ -14,7 +14,7 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
             _context = context;
         }
 
-      
+        #region GET
 
         public async Task<IEnumerable<User>?> GetUsers()
         {
@@ -48,6 +48,42 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
             }
 
             return user;
+        }
+
+        #endregion
+
+        #region PUT
+
+        public async Task<User?> UpdateUser(int id, User user)
+        {
+            if (_context.User == null) { return null; }
+
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!EntityExists(id))
+                {
+                    return null;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return user;
+        }
+
+        #endregion
+
+        private bool EntityExists(int id)
+        {
+            return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

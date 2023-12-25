@@ -6,5 +6,6 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
     {
         Task<IEnumerable<Address>?> GetAddresses();
         Task<Address?> GetAddress(int id);
+        Task<Address?> UpdateAddress(int id, Address address);
     }
 }

@@ -13,6 +13,7 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
             _context = context;
         }
 
+        #region GET
         public async Task<IEnumerable<Skill>?> GetSkills()
         {
             if (_context.Skill == null)
@@ -45,6 +46,45 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
             }
 
             return skill;
+        }
+
+        #endregion
+
+        #region PUT
+
+        public async Task<Skill?> UpdateSkill(int id, Skill skill)
+        {
+            if (_context.Skill == null)
+            {
+                return null;
+            }
+
+            _context.Entry(skill).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch( DbUpdateConcurrencyException)
+            {
+                if (!EntityExists(id))
+                {
+                    return null;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return skill;
+        }
+
+        #endregion
+
+        private bool EntityExists(int id)
+        {
+            return (_context.Skill?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

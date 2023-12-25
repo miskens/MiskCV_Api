@@ -6,5 +6,6 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
     {
         Task<IEnumerable<Company>?> GetCompanies();
         Task<Company?> GetCompany(int id);
+        Task<Company?> UpdateCompany(int id,  Company company);
     }
 }

@@ -24,6 +24,8 @@ namespace MiskCv_Api.Controllers
             _addressRepository = addressRepository;
         }
 
+        #region GET
+
         // GET: api/Addresses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Address>>> GetAddress()
@@ -52,6 +54,10 @@ namespace MiskCv_Api.Controllers
             return address;
         }
 
+        #endregion
+
+        #region PUT
+
         // PUT: api/Addresses/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -62,26 +68,14 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(address).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AddressExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _addressRepository.UpdateAddress(id, address);
 
             return NoContent();
         }
+
+        #endregion
+
+        #region POST
 
         // POST: api/Addresses
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -97,6 +91,10 @@ namespace MiskCv_Api.Controllers
 
             return CreatedAtAction("GetAddress", new { id = address.Id }, address);
         }
+
+        #endregion
+
+        #region DELETE
 
         // DELETE: api/Addresses/5
         [HttpDelete("{id}")]
@@ -118,9 +116,15 @@ namespace MiskCv_Api.Controllers
             return NoContent();
         }
 
+        #endregion
+
+        #region HELPERS
+
         private bool AddressExists(int id)
         {
             return (_context.Address?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        #endregion
     }
 }
