@@ -13,6 +13,9 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
         {
             _context = context;
         }
+
+      
+
         public async Task<IEnumerable<User>?> GetUsers()
         {
             if (_context.User == null)
@@ -28,6 +31,23 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
             }
 
             return users;
+        }  
+        
+        public async Task<User?> GetUser(int id)
+        {
+            if (_context.User == null)
+            {
+                return null;
+            }
+
+            var user = await _context.User.FindAsync(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return user;
         }
     }
 }

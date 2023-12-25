@@ -42,11 +42,7 @@ namespace MiskCv_Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Skill>> GetSkill(int id)
         {
-          if (_context.Skill == null)
-          {
-              return NotFound();
-          }
-            var skill = await _context.Skill.FindAsync(id);
+            var skill = await _skillRepository.GetSkill(id);
 
             if (skill == null)
             {

@@ -29,5 +29,22 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
 
             return addresses;
         }
+
+        public async Task<Address?> GetAddress(int id)
+        {
+            if (_context.Address == null)
+            {
+                return null;
+            }
+
+            var address = await _context.Address.FindAsync(id);
+
+            if (address == null)
+            {
+                return null;
+            }
+
+            return address;
+        }
     }
 }
