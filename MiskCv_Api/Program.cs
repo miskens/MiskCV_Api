@@ -4,6 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
 using MiskCv_Api.Data;
+using MiskCv_Api.Services.Repositories.AddressesRepository;
+using MiskCv_Api.Services.Repositories.CompaniesRepository;
+using MiskCv_Api.Services.Repositories.SkillsRepository;
+using MiskCv_Api.Services.Repositories.UsersRepository;
 
 namespace MiskCv_Api
 {
@@ -26,6 +30,11 @@ namespace MiskCv_Api
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MiskCvDbTEMPConnString"));
             });
+
+            builder.Services.AddTransient<IUserRepository, UserRepository>();
+            builder.Services.AddTransient<IAddressRepository, AddressRepository>();
+            builder.Services.AddTransient<ICompanyRepository,  CompanyRepository>();
+            builder.Services.AddTransient<ISkillRepository, SkillRepository>(); 
 
             var app = builder.Build();
 

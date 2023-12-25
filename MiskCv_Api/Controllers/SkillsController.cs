@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
 using MiskCv_Api.Models;
+using MiskCv_Api.Services.Repositories.SkillsRepository;
 
 namespace MiskCv_Api.Controllers
 {
@@ -15,29 +16,26 @@ namespace MiskCv_Api.Controllers
     public class SkillsController : ControllerBase
     {
         private readonly MiskCvDbContext _context;
+        private readonly ISkillRepository _skillRepository;
 
-        public SkillsController(MiskCvDbContext context)
+        public SkillsController(MiskCvDbContext context, ISkillRepository skillRepository)
         {
             _context = context;
+            _skillRepository = skillRepository;
         }
 
         // GET: api/Skills
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Skill>>> GetSkill()
         {
-            if (_context.Skill == null)
+            var skills = await _skillRepository.GetSkills();
+
+            if (skills == null)
             {
                 return NotFound();
             }
 
-            var skills = await _context.Skill.ToListAsync();
-
-            if (skills.Count < 0 || skills == null)
-            {
-                return NotFound();
-            }
-
-            return skills;
+            return Ok(skills);
         }
 
         // GET: api/Skills/5

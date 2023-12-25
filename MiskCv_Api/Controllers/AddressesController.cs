@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
 using MiskCv_Api.Models;
+using MiskCv_Api.Services.Repositories.AddressesRepository;
 
 namespace MiskCv_Api.Controllers
 {
@@ -15,31 +16,26 @@ namespace MiskCv_Api.Controllers
     public class AddressesController : ControllerBase
     {
         private readonly MiskCvDbContext _context;
+        private readonly IAddressRepository _addressRepository;
 
-        public AddressesController(MiskCvDbContext context)
+        public AddressesController(MiskCvDbContext context, IAddressRepository addressRepository)
         {
             _context = context;
+            _addressRepository = addressRepository;
         }
 
         // GET: api/Addresses
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Address>>> GetAddress()
         {
-            // TODO: Check if we can get addresses with users instead
+            var addresses = await _addressRepository.GetAddresses();
 
-            if (_context.Address == null)
+            if (addresses == null)
             {
                 return NotFound();
             }
 
-            var addresses = await _context.Address.ToListAsync();
-
-            if (addresses.Count < 0 || addresses == null)
-            {
-                return NotFound();
-            }
-
-            return addresses;
+            return Ok(addresses);
         }
 
         // GET: api/Addresses/5

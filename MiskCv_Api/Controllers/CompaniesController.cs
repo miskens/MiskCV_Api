@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
 using MiskCv_Api.Models;
+using MiskCv_Api.Services.Repositories.CompaniesRepository;
 
 namespace MiskCv_Api.Controllers
 {
@@ -15,29 +16,26 @@ namespace MiskCv_Api.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly MiskCvDbContext _context;
+        private readonly ICompanyRepository _companiesRepository;
 
-        public CompaniesController(MiskCvDbContext context)
+        public CompaniesController(MiskCvDbContext context, ICompanyRepository companiesRepository)
         {
             _context = context;
+            _companiesRepository = companiesRepository;
         }
 
         // GET: api/Companies
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
-            if (_context.Company == null)
+            var companies = await _companiesRepository.GetCompanies();
+
+            if (companies == null)
             {
                 return NotFound();
             }
 
-            var companies = await _context.Company.ToListAsync();
-
-            if (companies.Count < 0 || companies == null)
-            {
-                return NotFound();
-            }
-
-            return companies;
+            return Ok(companies);
         }
 
         // GET: api/Companies/5
