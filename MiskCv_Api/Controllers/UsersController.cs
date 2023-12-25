@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+//using Microsoft.Graph.Models;
 using MiskCv_Api.Data;
 using MiskCv_Api.Dtos;
 using MiskCv_Api.Models;
+using MiskCv_Api.Services.Repositories.UsersRepository;
 
 namespace MiskCv_Api.Controllers
 {
@@ -18,29 +20,26 @@ namespace MiskCv_Api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly MiskCvDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public UsersController(MiskCvDbContext context)
+        public UsersController(MiskCvDbContext context, IUserRepository userRepository)
         {
             _context = context;
+            _userRepository = userRepository;
         }
 
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
-            if (_context.User == null)
+            var users = await _userRepository.GetUsers();
+
+            if (users == null)
             {
                 return NotFound();
             }
 
-            var users = await _context.User.ToListAsync();
-
-            if (users.Count < 0 || users == null)
-            {
-                return NotFound();
-            }
-
-            return users;
+            return Ok(users);
         }
 
         // GET: api/Users/5
