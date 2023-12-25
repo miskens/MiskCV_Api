@@ -83,14 +83,11 @@ namespace MiskCv_Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Address>> PostAddress(Address address)
         {
-          if (_context.Address == null)
-          {
-              return Problem("Entity set 'MiskCvDbContext.Address'  is null.");
-          }
-            _context.Address.Add(address);
-            await _context.SaveChangesAsync();
+            var newAddress = await _addressRepository.CreateAddress(address);
 
-            return CreatedAtAction("GetAddress", new { id = address.Id }, address);
+            if (newAddress == null) { return Problem("There was a problem adding address"); }
+
+            return CreatedAtAction("GetAddress", new { id = newAddress.Id }, newAddress);
         }
 
         #endregion

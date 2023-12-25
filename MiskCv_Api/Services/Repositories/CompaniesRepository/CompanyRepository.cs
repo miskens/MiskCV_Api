@@ -82,5 +82,19 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
         {
             return (_context.Company?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        #region POST
+
+        public async Task<Company?> CreateCompany(Company company)
+        {
+            if (_context.Company == null) { return null; }
+
+            _context.Entry(company).State = EntityState.Added;
+            await _context.SaveChangesAsync();
+
+            return company;
+        }
+
+        #endregion
     }
 }

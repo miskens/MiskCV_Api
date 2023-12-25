@@ -84,16 +84,12 @@ namespace MiskCv_Api.Controllers
         // POST: api/Companies
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Company>> PostCompany(Company company)
+        public async Task<ActionResult<Company>?> PostCompany(Company company)
         {
-          if (_context.Company == null)
-          {
-              return Problem("Entity set 'MiskCvDbContext.Company'  is null.");
-          }
-            _context.Company.Add(company);
-            await _context.SaveChangesAsync();
+            var newCompany = await _companiesRepository.CreateCompany(company);
+            if (newCompany == null) { return Problem("There was a problem adding company"); }
 
-            return CreatedAtAction("GetCompany", new { id = company.Id }, company);
+            return CreatedAtAction("GetCompany", new { id = newCompany.Id }, newCompany);
         }
 
         #endregion
