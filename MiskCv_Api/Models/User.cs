@@ -29,5 +29,5 @@ public partial class User
 
     public string ImageUrl { get; set; } = string.Empty;
 
-    public ICollection<Address> Address { get; set; } = new List<Address>();
+    public virtual ICollection<Address> Address { get; set; } = new List<Address>();
 }
