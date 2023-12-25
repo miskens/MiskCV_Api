@@ -82,6 +82,19 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
 
         #endregion
 
+        #region POST
+
+        public async Task<Skill?> CreateSkill(Skill skill)
+        {
+            if (_context.Skill == null) { return null; }
+
+            _context.Entry(skill).State = EntityState.Added;
+            await _context.SaveChangesAsync();
+
+            return skill;
+        }
+
+        #endregion
         private bool EntityExists(int id)
         {
             return (_context.Skill?.Any(e => e.Id == id)).GetValueOrDefault();

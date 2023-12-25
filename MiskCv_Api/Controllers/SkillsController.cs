@@ -82,14 +82,11 @@ namespace MiskCv_Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Skill>> PostSkill(Skill skill)
         {
-          if (_context.Skill == null)
-          {
-              return Problem("Entity set 'MiskCvDbContext.Skill'  is null.");
-          }
-            _context.Skill.Add(skill);
-            await _context.SaveChangesAsync();
+            var newSkill = await _skillRepository.CreateSkill(skill);
 
-            return CreatedAtAction("GetSkill", new { id = skill.Id }, skill);
+            if (newSkill == null) { return Problem("There was a problem adding skill"); }
+
+            return CreatedAtAction("GetSkill", new { id = newSkill.Id }, newSkill);
         }
 
         #endregion

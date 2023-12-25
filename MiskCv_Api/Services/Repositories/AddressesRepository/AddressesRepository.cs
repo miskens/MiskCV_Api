@@ -81,6 +81,20 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
 
         #endregion
 
+        #region POST
+
+        public async Task<Address?> CreateAddress(Address address)
+        {
+            if (_context.Address == null) { return null; }
+
+            _context.Entry(address).State = EntityState.Added;
+            await _context.SaveChangesAsync();
+
+            return address;
+        }
+
+        #endregion
+
         private bool EntityExists(int id)
         {
             return (_context.Address?.Any(e => e.Id == id)).GetValueOrDefault();

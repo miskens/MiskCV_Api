@@ -74,38 +74,13 @@ namespace MiskCv_Api.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(UserCreateDto userDto)
+        public async Task<ActionResult<User>?> PostUser(User user)
         {
-            if (_context.User == null)
-            {
-                return Problem("Entity set 'MiskCvDbContext.User'  is null.");
-            }
+            var newUser = await _userRepository.CreateUser(user);
 
-            User user = new User
-            {
-                FirstName = userDto.FirstName,
-                LastName = userDto.LastName,
-                Username = userDto.Username,
-                DateOfBirth = userDto.DateOfBirth,
-                ImageUrl = userDto.ImageUrl,
-            };
-       
-            foreach (AddressCreateDto a in userDto.Address)
-            {
-                var add = new Address
-                {
-                    Street = a.Street,
-                    PostNr = a.PostNr,
-                    City = a.City,
-                    Country = a.Country
-                };
-                user.Address.Add(add);
-            }
+            if (newUser == null) { return null;  }
 
-            _context.User.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = newUser.Id }, newUser);
         }
 
         // DELETE: api/Users/5

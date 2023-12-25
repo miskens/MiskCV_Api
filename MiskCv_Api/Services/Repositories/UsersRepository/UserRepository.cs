@@ -81,6 +81,20 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
 
         #endregion
 
+        #region POST
+
+        public async Task<User?> CreateUser(User user)
+        {
+            if (_context.User == null) { return null; }
+
+            _context.Entry(user).State = EntityState.Added;
+            await _context.SaveChangesAsync();
+
+            return user;
+        }
+
+        #endregion
+
         private bool EntityExists(int id)
         {
             return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
