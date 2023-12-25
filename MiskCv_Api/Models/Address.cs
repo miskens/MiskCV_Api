@@ -29,5 +29,5 @@ public partial class Address
     public int UserId { get; set; }
 
     [JsonIgnore]
-    public User User { get; set; } = new User();
+    public virtual User? User { get; set; }
 }

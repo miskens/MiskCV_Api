@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
+using MiskCv_Api.Dtos;
 using MiskCv_Api.Models;
 using MiskCv_Api.Services.Repositories.AddressesRepository;
 
