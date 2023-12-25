@@ -46,12 +46,7 @@ namespace MiskCv_Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            if (_context.User == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.User.FindAsync(id);
+            var user = await _userRepository.GetUser(id);
 
             if (user == null)
             {

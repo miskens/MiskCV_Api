@@ -42,11 +42,7 @@ namespace MiskCv_Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Address>> GetAddress(int id)
         {
-          if (_context.Address == null)
-          {
-              return NotFound();
-          }
-            var address = await _context.Address.FindAsync(id);
+            var address = await _addressRepository.GetAddress(id);
 
             if (address == null)
             {

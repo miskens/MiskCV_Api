@@ -29,5 +29,22 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
 
             return companies;
         }
+
+        public async Task<Company?> GetCompany(int id)
+        {
+            if (_context.Company == null)
+            {
+                return null;
+            }
+
+            var company = await _context.Company.FindAsync(id);
+
+            if (company == null)
+            {
+                return null;
+            }
+
+            return company;
+        }
     }
 }

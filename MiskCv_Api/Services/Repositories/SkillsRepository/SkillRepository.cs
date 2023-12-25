@@ -29,5 +29,22 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
 
             return skills;
         }
+
+        public async Task<Skill?> GetSkill(int id)
+        {
+            if (_context.Skill == null)
+            {
+                return null;
+            }
+
+            var skill = await _context.Skill.FindAsync(id);
+
+            if (skill == null)
+            {
+                return null;
+            }
+
+            return skill;
+        }
     }
 }
