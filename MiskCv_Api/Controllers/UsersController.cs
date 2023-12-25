@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 //using Microsoft.Graph.Models;
@@ -19,14 +20,14 @@ namespace MiskCv_Api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly MiskCvDbContext _context;
         private readonly IUserRepository _userRepository;
 
-        public UsersController(MiskCvDbContext context, IUserRepository userRepository)
+        public UsersController(IUserRepository userRepository)
         {
-            _context = context;
             _userRepository = userRepository;
         }
+
+        #region GET
 
         // GET: api/Users
         [HttpGet]
@@ -56,6 +57,10 @@ namespace MiskCv_Api.Controllers
             return user;
         }
 
+        #endregion
+
+        #region PUT
+
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -66,10 +71,19 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            var updatedUser = await _userRepository.UpdateUser(id, user);
+            var result = await _userRepository.UpdateUser(id, user);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating user");
+            }
 
             return NoContent();
         }
+
+        #endregion
+
+        #region POST
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -78,34 +92,25 @@ namespace MiskCv_Api.Controllers
         {
             var newUser = await _userRepository.CreateUser(user);
 
-            if (newUser == null) { return null;  }
+            if (newUser == null) { return null; }
 
             return CreatedAtAction("GetUser", new { id = newUser.Id }, newUser);
         }
+
+        #endregion
+
+        #region DELETE
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            if (_context.User == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.User.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.User.Remove(user);
-            await _context.SaveChangesAsync();
+            var result = await _userRepository.DeleteUser(id);
+            if (result == false) { return Problem("There was a problem deleting user"); }
 
             return NoContent();
         }
 
-        //private bool UserExists(int id)
-        //{
-        //    return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
-        //}
+        #endregion
     }
 }

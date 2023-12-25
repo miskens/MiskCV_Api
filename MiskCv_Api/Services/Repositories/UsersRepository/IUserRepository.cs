@@ -8,5 +8,6 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
         Task<User?> GetUser(int id);
         Task<User?> UpdateUser(int id, User user);
         Task<User?> CreateUser(User user);
+        Task<bool> DeleteUser(int id);
     }
 }

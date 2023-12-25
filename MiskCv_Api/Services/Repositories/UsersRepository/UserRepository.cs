@@ -95,9 +95,31 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
 
         #endregion
 
+        #region DELETE
+
+        public async Task<bool> DeleteUser(int id)
+        {
+            if (_context.User == null) { return false; }
+
+            var user = await _context.User.FindAsync(id);
+
+            if(user == null) { return false; }
+
+            _context.Entry(user).State = EntityState.Deleted;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        #endregion
+
+        #region HELPERS
+
         private bool EntityExists(int id)
         {
             return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        #endregion
     }
 }

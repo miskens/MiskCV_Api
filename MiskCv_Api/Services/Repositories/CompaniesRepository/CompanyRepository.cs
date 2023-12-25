@@ -78,10 +78,6 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
         }
 
         #endregion
-        private bool EntityExists(int id)
-        {
-            return (_context.Company?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
 
         #region POST
 
@@ -93,6 +89,31 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
             await _context.SaveChangesAsync();
 
             return company;
+        }
+
+        #region DELETE
+
+        public async Task<bool> DeleteCompany(int id)
+        {
+            if (_context.Company == null) { return false; }
+
+            var company = await _context.Company.FindAsync(id);
+
+            if (company == null) { return false; }
+
+            _context.Entry(company).State = EntityState.Deleted;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        #endregion
+
+        #region HELPERS
+
+        private bool EntityExists(int id)
+        {
+            return (_context.Company?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
         #endregion

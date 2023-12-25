@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
@@ -15,12 +16,10 @@ namespace MiskCv_Api.Controllers
     [ApiController]
     public class SkillsController : ControllerBase
     {
-        private readonly MiskCvDbContext _context;
         private readonly ISkillRepository _skillRepository;
 
-        public SkillsController(MiskCvDbContext context, ISkillRepository skillRepository)
+        public SkillsController(ISkillRepository skillRepository)
         {
-            _context = context;
             _skillRepository = skillRepository;
         }
 
@@ -68,7 +67,12 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            var updatedSkill = await _skillRepository.UpdateSkill(id, skill);
+            var result = await _skillRepository.UpdateSkill(id, skill);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating skill");
+            }
 
             return NoContent();
         }
@@ -97,29 +101,11 @@ namespace MiskCv_Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSkill(int id)
         {
-            if (_context.Skill == null)
-            {
-                return NotFound();
-            }
-            var skill = await _context.Skill.FindAsync(id);
-            if (skill == null)
-            {
-                return NotFound();
-            }
+            var result = await _skillRepository.DeleteSkill(id);
 
-            _context.Skill.Remove(skill);
-            await _context.SaveChangesAsync();
+            if (result == false) { return Problem("There was a problem deleting skill"); }
 
             return NoContent();
-        }
-
-        #endregion
-
-        #region HELPERS
-
-        private bool SkillExists(int id)
-        {
-            return (_context.Skill?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
         #endregion
