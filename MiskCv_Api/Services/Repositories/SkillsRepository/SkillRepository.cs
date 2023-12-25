@@ -95,9 +95,30 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
         }
 
         #endregion
+
+        #region DELETE
+
+        public async Task<bool> DeleteSkill(int id)
+        {
+            if (_context.Skill == null) { return false; }
+
+            var skill = await _context.Skill.FindAsync(id);
+            if (skill == null) { return false; };
+
+            _context.Entry(skill).State = EntityState.Deleted;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        #endregion
+
+        #region HELPERS
         private bool EntityExists(int id)
         {
             return (_context.Skill?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        #endregion
     }
 }

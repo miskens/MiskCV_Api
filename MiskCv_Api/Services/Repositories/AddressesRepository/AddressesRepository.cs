@@ -95,9 +95,31 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
 
         #endregion
 
+        #region DELETE
+
+        public async Task<bool> DeleteAddress(int id)
+        {
+            if (_context.Address == null) { return false; }
+
+            var address = await _context.Address.FindAsync(id);
+
+            if (address == null) { return false; }
+
+            _context.Entry(address).State = EntityState.Deleted;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        #endregion
+
+        #region HELPERS
+
         private bool EntityExists(int id)
         {
             return (_context.Address?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        #endregion
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
@@ -16,12 +17,10 @@ namespace MiskCv_Api.Controllers
     [ApiController]
     public class AddressesController : ControllerBase
     {
-        private readonly MiskCvDbContext _context;
         private readonly IAddressRepository _addressRepository;
 
-        public AddressesController(MiskCvDbContext context, IAddressRepository addressRepository)
+        public AddressesController(IAddressRepository addressRepository)
         {
-            _context = context;
             _addressRepository = addressRepository;
         }
 
@@ -69,7 +68,12 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            await _addressRepository.UpdateAddress(id, address);
+            var result = await _addressRepository.UpdateAddress(id, address);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating address");
+            }
 
             return NoContent();
         }
@@ -98,29 +102,11 @@ namespace MiskCv_Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAddress(int id)
         {
-            if (_context.Address == null)
-            {
-                return NotFound();
-            }
-            var address = await _context.Address.FindAsync(id);
-            if (address == null)
-            {
-                return NotFound();
-            }
+            var result = await _addressRepository.DeleteAddress(id);
 
-            _context.Address.Remove(address);
-            await _context.SaveChangesAsync();
+            if(result == false) { return Problem("There was a problem deleting address"); }
 
             return NoContent();
-        }
-
-        #endregion
-
-        #region HELPERS
-
-        private bool AddressExists(int id)
-        {
-            return (_context.Address?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
         #endregion

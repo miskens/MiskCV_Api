@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
@@ -15,12 +16,10 @@ namespace MiskCv_Api.Controllers
     [ApiController]
     public class CompaniesController : ControllerBase
     {
-        private readonly MiskCvDbContext _context;
         private readonly ICompanyRepository _companiesRepository;
 
-        public CompaniesController(MiskCvDbContext context, ICompanyRepository companiesRepository)
+        public CompaniesController(ICompanyRepository companiesRepository)
         {
-            _context = context;
             _companiesRepository = companiesRepository;
         }
 
@@ -44,11 +43,7 @@ namespace MiskCv_Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompany(int id)
         {
-          if (_context.Company == null)
-          {
-              return NotFound();
-          }
-            var company = await _context.Company.FindAsync(id);
+            var company = await _companiesRepository.GetCompany(id);
 
             if (company == null)
             {
@@ -72,7 +67,12 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            await _companiesRepository.UpdateCompany(id, company);
+            var result = await _companiesRepository.UpdateCompany(id, company);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating company");
+            }
 
             return NoContent();
         }
@@ -100,28 +100,11 @@ namespace MiskCv_Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCompany(int id)
         {
-            if (_context.Company == null)
-            {
-                return NotFound();
-            }
-            var company = await _context.Company.FindAsync(id);
-            if (company == null)
-            {
-                return NotFound();
-            }
+            var result = await _companiesRepository.DeleteCompany(id);
 
-            _context.Company.Remove(company);
-            await _context.SaveChangesAsync();
+            if (result == false) { return Problem("There was a problem deleting company"); }
 
             return NoContent();
-        }
-
-        #endregion
-
-        #region HELPERS
-        private bool CompanyExists(int id)
-        {
-            return (_context.Company?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
         #endregion
