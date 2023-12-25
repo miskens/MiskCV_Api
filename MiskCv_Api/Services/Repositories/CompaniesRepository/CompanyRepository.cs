@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Data;
+using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
 using MiskCv_Api.Models;
 
@@ -13,6 +14,7 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
             _context = context;
         }
 
+        #region GET
         public async Task<IEnumerable<Company>?> GetCompanies()
         {
             if (_context.Company == null)
@@ -45,6 +47,40 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
             }
 
             return company;
+        }
+
+        #endregion
+
+        #region PUT
+
+        public async Task<Company?> UpdateCompany(int id, Company company)
+        {
+            if (_context.Company == null) { return null; }
+
+            _context.Entry(company).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DBConcurrencyException)
+            {
+                if (!EntityExists(id))
+                {
+                    return null;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return company;
+        }
+
+        #endregion
+        private bool EntityExists(int id)
+        {
+            return (_context.Company?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

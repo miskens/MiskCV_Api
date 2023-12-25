@@ -24,6 +24,8 @@ namespace MiskCv_Api.Controllers
             _companiesRepository = companiesRepository;
         }
 
+        #region GET
+
         // GET: api/Companies
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
@@ -56,6 +58,10 @@ namespace MiskCv_Api.Controllers
             return company;
         }
 
+        #endregion
+
+        #region PUT
+
         // PUT: api/Companies/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -66,26 +72,14 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(company).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CompanyExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _companiesRepository.UpdateCompany(id, company);
 
             return NoContent();
         }
+
+        #endregion
+
+        #region POST
 
         // POST: api/Companies
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -101,6 +95,10 @@ namespace MiskCv_Api.Controllers
 
             return CreatedAtAction("GetCompany", new { id = company.Id }, company);
         }
+
+        #endregion
+
+        #region DELETE
 
         // DELETE: api/Companies/5
         [HttpDelete("{id}")]
@@ -122,9 +120,14 @@ namespace MiskCv_Api.Controllers
             return NoContent();
         }
 
+        #endregion
+
+        #region HELPERS
         private bool CompanyExists(int id)
         {
             return (_context.Company?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        #endregion
     }
 }

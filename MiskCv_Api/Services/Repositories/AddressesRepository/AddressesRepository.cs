@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Data;
+using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
 using MiskCv_Api.Models;
 
@@ -12,6 +13,8 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
         {
             _context = context;
         }
+
+        #region GET
 
         public async Task<IEnumerable<Address>?> GetAddresses()
         {
@@ -45,6 +48,42 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
             }
 
             return address;
+        }
+
+        #endregion
+
+        #region PUT
+
+        public async Task<Address?> UpdateAddress(int id, Address address)
+        {
+            if (_context.Address == null) { return null; }
+
+            _context.Entry(address).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DBConcurrencyException)
+            {
+                if (!EntityExists(id))
+                {
+                    return null;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return address;
+        }
+
+        #endregion
+
+        private bool EntityExists(int id)
+        {
+            return (_context.Address?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

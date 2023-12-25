@@ -6,5 +6,6 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
     {
         Task<IEnumerable<Skill>?> GetSkills();
         Task<Skill?> GetSkill(int id);
+        Task<Skill?> UpdateSkill(int id, Skill skill);
     }
 }

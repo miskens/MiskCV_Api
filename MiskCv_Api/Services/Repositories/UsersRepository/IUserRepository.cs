@@ -6,5 +6,6 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
     {
         Task<IEnumerable<User>?> GetUsers();
         Task<User?> GetUser(int id);
+        Task<User?> UpdateUser(int id, User user);
     }
 }

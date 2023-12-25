@@ -24,6 +24,8 @@ namespace MiskCv_Api.Controllers
             _skillRepository = skillRepository;
         }
 
+        #region GET
+
         // GET: api/Skills
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Skill>>> GetSkill()
@@ -52,6 +54,10 @@ namespace MiskCv_Api.Controllers
             return skill;
         }
 
+        #endregion
+
+        #region PUT
+
         // PUT: api/Skills/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -62,26 +68,14 @@ namespace MiskCv_Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(skill).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SkillExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var updatedSkill = await _skillRepository.UpdateSkill(id, skill);
 
             return NoContent();
         }
+
+        #endregion
+
+        #region POST
 
         // POST: api/Skills
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -97,6 +91,10 @@ namespace MiskCv_Api.Controllers
 
             return CreatedAtAction("GetSkill", new { id = skill.Id }, skill);
         }
+
+        #endregion
+
+        #region DELETE
 
         // DELETE: api/Skills/5
         [HttpDelete("{id}")]
@@ -118,9 +116,15 @@ namespace MiskCv_Api.Controllers
             return NoContent();
         }
 
+        #endregion
+
+        #region HELPERS
+
         private bool SkillExists(int id)
         {
             return (_context.Skill?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        #endregion
     }
 }
