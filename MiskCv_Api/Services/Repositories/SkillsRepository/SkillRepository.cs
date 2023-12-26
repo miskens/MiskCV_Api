@@ -88,7 +88,7 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
         {
             if (_context.Skill == null) { return null; }
 
-            _context.Entry(skill).State = EntityState.Added;
+            _context.Skill.Add(skill);
             await _context.SaveChangesAsync();
 
             return skill;
@@ -105,7 +105,7 @@ namespace MiskCv_Api.Services.Repositories.SkillsRepository
             var skill = await _context.Skill.FindAsync(id);
             if (skill == null) { return false; };
 
-            _context.Entry(skill).State = EntityState.Deleted;
+            _context.Skill.Remove(skill);
             await _context.SaveChangesAsync();
 
             return true;

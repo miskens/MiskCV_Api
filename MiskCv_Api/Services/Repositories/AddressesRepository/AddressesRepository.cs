@@ -87,7 +87,7 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
         {
             if (_context.Address == null) { return null; }
 
-            _context.Entry(address).State = EntityState.Added;
+            _context.Address.Add(address);
             await _context.SaveChangesAsync();
 
             return address;
@@ -105,7 +105,7 @@ namespace MiskCv_Api.Services.Repositories.AddressesRepository
 
             if (address == null) { return false; }
 
-            _context.Entry(address).State = EntityState.Deleted;
+            _context.Address.Remove(address);
             await _context.SaveChangesAsync();
 
             return true;
