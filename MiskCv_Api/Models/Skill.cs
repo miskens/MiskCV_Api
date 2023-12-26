@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MiskCv_Api.Models;
+﻿namespace MiskCv_Api.Models;
 
 public partial class Skill
 {
