@@ -87,7 +87,7 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
         {
             if (_context.User == null) { return null; }
 
-            _context.Entry(user).State = EntityState.Added;
+            _context.User.Add(user);
             await _context.SaveChangesAsync();
 
             return user;
@@ -105,7 +105,7 @@ namespace MiskCv_Api.Services.Repositories.UsersRepository
 
             if(user == null) { return false; }
 
-            _context.Entry(user).State = EntityState.Deleted;
+            _context.User.Remove(user);
             await _context.SaveChangesAsync();
 
             return true;

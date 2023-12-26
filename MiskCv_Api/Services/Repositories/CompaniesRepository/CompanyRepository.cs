@@ -85,11 +85,13 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
         {
             if (_context.Company == null) { return null; }
 
-            _context.Entry(company).State = EntityState.Added;
+            _context.Company.Add(company);
             await _context.SaveChangesAsync();
 
             return company;
         }
+
+        #endregion
 
         #region DELETE
 
@@ -101,7 +103,7 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
 
             if (company == null) { return false; }
 
-            _context.Entry(company).State = EntityState.Deleted;
+            _context.Company.Remove(company);
             await _context.SaveChangesAsync();
 
             return true;
@@ -118,6 +120,6 @@ namespace MiskCv_Api.Services.Repositories.CompaniesRepository
 
         #endregion
 
-        #endregion
+        
     }
 }
