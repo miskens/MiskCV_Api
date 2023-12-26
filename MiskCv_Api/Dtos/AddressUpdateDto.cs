@@ -5,6 +5,5 @@ public record struct AddressUpdateDto(
     string Street,
     string PostNr,
     string City,
-    string Country,
-    int userId
+    string Country
     );

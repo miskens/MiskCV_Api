@@ -1,42 +1,52 @@
-﻿namespace MiskCv_Api.Controllers;
+﻿using MapsterMapper;
+
+namespace MiskCv_Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class AddressesController : ControllerBase
 {
     private readonly IAddressRepository _addressRepository;
+    private readonly IMapper _mapper;
 
-    public AddressesController(IAddressRepository addressRepository)
+    public AddressesController(
+            IAddressRepository addressRepository,
+            IMapper mapper)
     {
         _addressRepository = addressRepository;
+        _mapper = mapper;
     }
 
     #region GET
 
     // GET: api/Addresses
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Address>>> GetAddress()
+    public async Task<ActionResult<IEnumerable<AddressDto>>> GetAddress()
     {
-        var addresses = await _addressRepository.GetAddresses();
+        var addressModels = await _addressRepository.GetAddresses();
 
-        if (addresses == null)
+        if (addressModels == null)
         {
             return NotFound();
         }
+
+        var addresses = _mapper.Map<List<AddressDto>>(addressModels);
 
         return Ok(addresses);
     }
 
     // GET: api/Addresses/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Address>> GetAddress(int id)
+    public async Task<ActionResult<AddressDto>> GetAddress(int id)
     {
-        var address = await _addressRepository.GetAddress(id);
+        var addressModel = await _addressRepository.GetAddress(id);
 
-        if (address == null)
+        if (addressModel == null)
         {
             return NotFound();
         }
+
+        var address = _mapper.Map<AddressDto>(addressModel);
 
         return address;
     }
@@ -48,8 +58,10 @@ public class AddressesController : ControllerBase
     // PUT: api/Addresses/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutAddress(int id, Address address)
+    public async Task<IActionResult> PutAddress(int id, AddressUpdateDto addressDto)
     {
+        var address = _mapper.Map<Address>(addressDto);
+
         if (id != address.Id)
         {
             return BadRequest();
@@ -72,8 +84,10 @@ public class AddressesController : ControllerBase
     // POST: api/Addresses
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Address>> PostAddress(Address address)
+    public async Task<ActionResult<Address>> PostAddress(AddressCreateDto addressDto)
     {
+        var address = _mapper.Map<Address>(addressDto);
+
         var newAddress = await _addressRepository.CreateAddress(address);
 
         if (newAddress == null) { return Problem("There was a problem adding address"); }
