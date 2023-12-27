@@ -13,4 +13,7 @@ public partial class Skill
 
     [MaxLength(50)]
     public string Proficiency { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public ICollection<Company>? Company { get; set; }
 }
