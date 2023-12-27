@@ -1,13 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
-using MiskCv_Api.Data;
-using MiskCv_Api.Services.Repositories.AddressesRepository;
-using MiskCv_Api.Services.Repositories.CompaniesRepository;
-using MiskCv_Api.Services.Repositories.SkillsRepository;
-using MiskCv_Api.Services.Repositories.UsersRepository;
 
 namespace MiskCv_Api
 {
@@ -25,6 +19,7 @@ namespace MiskCv_Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            
 
             builder.Services.AddDbContext<MiskCvDbContext>(options =>
             {

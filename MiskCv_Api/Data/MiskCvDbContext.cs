@@ -1,18 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MiskCv_Api.Models;
+﻿namespace MiskCv_Api.Data;
 
-namespace MiskCv_Api.Data
+public class MiskCvDbContext: DbContext
 {
-    public class MiskCvDbContext: DbContext
+    public MiskCvDbContext(DbContextOptions<MiskCvDbContext> options): base(options)
     {
-        public MiskCvDbContext(DbContextOptions<MiskCvDbContext> options): base(options)
-        {
-        }
-        public DbSet<User> User { get; set; } = default!;
-        public DbSet<Skill> Skill { get; set; } = default!;
-        public DbSet<Company> Company { get; set; } = default!;
-        public DbSet<Address> Address { get; set; } = default!;
+    }
+    public DbSet<User> User { get; set; } = default!;
+    public DbSet<Skill> Skill { get; set; } = default!;
+    public DbSet<Company> Company { get; set; } = default!;
+    public DbSet<Address> Address { get; set; } = default!;
 
+<<<<<<< HEAD
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //modelBuilder.Entity<User>().HasMany(u => u.Address)
@@ -20,8 +18,15 @@ namespace MiskCv_Api.Data
             //    .HasForeignKey(a => a.UserId)
             //    .IsRequired(false);
 
+=======
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>().HasMany(u => u.Address)
+            .WithOne(a => a.User)
+            .HasForeignKey(a => a.UserId)
+            .IsRequired(false);
+>>>>>>> main
 
-            base.OnModelCreating(modelBuilder);
-        }
+        base.OnModelCreating(modelBuilder);
     }
 }
