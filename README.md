@@ -57,10 +57,10 @@ This is just a personal project where I create my CV and practice my skills and 
 - [X] Scaffolded Database with Entity Framework(database first approach)
 - [X] Added new Azure Tenant with and registered new domain 
 - [X] Added this README.md
-- [ ] Add Controllers
-- [ ] Add Repository pattern
-- [ ] Add DTOs
-- [ ] Add Mapster and Map Entities to DTOs
+- [X] Add Controllers
+- [X] Add Repository pattern
+- [X] Add DTOs
+- [X] Add Mapster and Map Entities to DTOs
 - [ ] Add Redis
 - [ ] Add Azure Application Insights logging
 - [ ] Add and configure Azure App registration
