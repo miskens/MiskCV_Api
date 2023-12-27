@@ -5,5 +5,5 @@ public record struct AddressCreateDto(
     string PostNr,
     string City,
     string Country,
-    string? UserId
+    int? UserId
     );
