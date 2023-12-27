@@ -1,42 +1,52 @@
-﻿namespace MiskCv_Api.Controllers;
+﻿using MapsterMapper;
+
+namespace MiskCv_Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
 
-    public UsersController(IUserRepository userRepository)
+    public UsersController(
+            IUserRepository userRepository,
+            IMapper mapper)
     {
         _userRepository = userRepository;
+        _mapper = mapper;
     }
 
     #region GET
 
     // GET: api/Users
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<User>>> GetUser()
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUser()
     {
-        var users = await _userRepository.GetUsers();
+        var userModels = await _userRepository.GetUsers();
 
-        if (users == null)
+        if (userModels == null)
         {
             return NotFound();
         }
+
+        var users = _mapper.Map<List<UserDto>>(userModels);
 
         return Ok(users);
     }
 
     // GET: api/Users/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<User>> GetUser(int id)
+    public async Task<ActionResult<UserDto>> GetUser(int id)
     {
-        var user = await _userRepository.GetUser(id);
+        var userModel = await _userRepository.GetUser(id);
 
-        if (user == null)
+        if (userModel == null)
         {
             return NotFound();
         }
+
+        var user = _mapper.Map<UserDto>(userModel);
 
         return user;
     }
@@ -48,8 +58,10 @@ public class UsersController : ControllerBase
     // PUT: api/Users/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutUser(int id, User user)
+    public async Task<IActionResult> PutUser(int id, UserUpdateDto userDto)
     {
+        var user = _mapper.Map<User>(userDto);
+        
         if (id != user.Id)
         {
             return BadRequest();
@@ -72,8 +84,10 @@ public class UsersController : ControllerBase
     // POST: api/Users
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<User>?> PostUser(User user)
+    public async Task<ActionResult<User>?> PostUser(UserCreateDto userDto)
     {
+        var user = _mapper.Map<User>(userDto);
+
         var newUser = await _userRepository.CreateUser(user);
 
         if (newUser == null) { return null; }

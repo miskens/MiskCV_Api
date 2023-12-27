@@ -1,42 +1,52 @@
-﻿namespace MiskCv_Api.Controllers;
+﻿using MapsterMapper;
+
+namespace MiskCv_Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class SkillsController : ControllerBase
 {
     private readonly ISkillRepository _skillRepository;
+    private readonly IMapper _mapper;
 
-    public SkillsController(ISkillRepository skillRepository)
+    public SkillsController(
+            ISkillRepository skillRepository,
+            IMapper mapper)
     {
         _skillRepository = skillRepository;
+        _mapper = mapper;
     }
 
     #region GET
 
     // GET: api/Skills
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Skill>>> GetSkill()
+    public async Task<ActionResult<IEnumerable<SkillDto>>> GetSkill()
     {
-        var skills = await _skillRepository.GetSkills();
+        var skillModels = await _skillRepository.GetSkills();
 
-        if (skills == null)
+        if (skillModels == null)
         {
             return NotFound();
         }
+
+        var skills = _mapper.Map<List<SkillDto>>(skillModels);
 
         return Ok(skills);
     }
 
     // GET: api/Skills/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Skill>> GetSkill(int id)
+    public async Task<ActionResult<SkillDto>> GetSkill(int id)
     {
-        var skill = await _skillRepository.GetSkill(id);
+        var skillModel = await _skillRepository.GetSkill(id);
 
-        if (skill == null)
+        if (skillModel == null)
         {
             return NotFound();
         }
+
+        var skill = _mapper.Map<SkillDto>(skillModel);
 
         return skill;
     }
@@ -48,8 +58,10 @@ public class SkillsController : ControllerBase
     // PUT: api/Skills/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutSkill(int id, Skill skill)
+    public async Task<IActionResult> PutSkill(int id, SkillUpdateDto skillDto)
     {
+        var skill = _mapper.Map<Skill>(skillDto);
+
         if (id != skill.Id)
         {
             return BadRequest();
@@ -72,8 +84,10 @@ public class SkillsController : ControllerBase
     // POST: api/Skills
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Skill>> PostSkill(Skill skill)
+    public async Task<ActionResult<Skill>> PostSkill(SkillCreateDto skillDto)
     {
+        var skill = _mapper.Map<Skill>(skillDto);
+        
         var newSkill = await _skillRepository.CreateSkill(skill);
 
         if (newSkill == null) { return Problem("There was a problem adding skill"); }

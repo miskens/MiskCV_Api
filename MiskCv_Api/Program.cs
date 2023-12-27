@@ -1,3 +1,4 @@
+using MapsterMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
@@ -19,7 +20,8 @@ namespace MiskCv_Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            
+            builder.Services.AddSingleton<IMapper, Mapper>();
+
 
             builder.Services.AddDbContext<MiskCvDbContext>(options =>
             {
