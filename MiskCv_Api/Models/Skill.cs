@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace MiskCv_Api.Models;
 
@@ -18,4 +19,7 @@ public partial class Skill
 
     [MaxLength(50)]
     public string Proficiency { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public ICollection<Company>? Company { get; set; }
 }

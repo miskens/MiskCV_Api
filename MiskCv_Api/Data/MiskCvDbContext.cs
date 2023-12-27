@@ -15,10 +15,11 @@ namespace MiskCv_Api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().HasMany(u => u.Address)
-                .WithOne(a => a.User)
-                .HasForeignKey(a => a.UserId)
-                .IsRequired(false);
+            //modelBuilder.Entity<User>().HasMany(u => u.Address)
+            //    .WithOne(a => a.User)
+            //    .HasForeignKey(a => a.UserId)
+            //    .IsRequired(false);
+
 
             base.OnModelCreating(modelBuilder);
         }

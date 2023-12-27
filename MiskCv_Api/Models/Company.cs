@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace MiskCv_Api.Models;
 
@@ -25,7 +26,9 @@ public partial class Company
     public DateTime? PeriodEnd { get; set; }
 
     [Required]
-    public int SkillsId { get; set; }
+    public int SkillId { get; set; }
 
     public string Description { get; set; } = string.Empty;
+    [JsonIgnore]
+    public ICollection<Skill>? Skill { get; set;}
 }
