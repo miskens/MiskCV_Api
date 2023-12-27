@@ -1,4 +1,4 @@
-﻿namespace MiskCv_Api.Dtos;
+﻿namespace MiskCv_Api.Dtos.UserDtos;
 
 public record struct UserCreateDto(
     string FirstName,

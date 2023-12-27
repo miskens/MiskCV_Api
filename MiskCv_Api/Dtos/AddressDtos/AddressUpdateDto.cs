@@ -1,9 +1,10 @@
 ﻿namespace MiskCv_Api.Dtos.AddressDtos;
 
 public record struct AddressUpdateDto(
-    int id,
+    int Id,
     string Street,
     string PostNr,
     string City,
-    string Country
+    string Country,
+    string UserId
     );
