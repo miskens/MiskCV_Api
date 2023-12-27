@@ -1,4 +1,4 @@
-﻿namespace MiskCv_Api.Dtos
+﻿namespace MiskCv_Api.Dtos.AddressDtos
 {
     public record struct AddressDto(
         int Id,

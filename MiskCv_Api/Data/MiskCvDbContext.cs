@@ -10,22 +10,12 @@ public class MiskCvDbContext: DbContext
     public DbSet<Company> Company { get; set; } = default!;
     public DbSet<Address> Address { get; set; } = default!;
 
-<<<<<<< HEAD
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            //modelBuilder.Entity<User>().HasMany(u => u.Address)
-            //    .WithOne(a => a.User)
-            //    .HasForeignKey(a => a.UserId)
-            //    .IsRequired(false);
-
-=======
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().HasMany(u => u.Address)
-            .WithOne(a => a.User)
-            .HasForeignKey(a => a.UserId)
-            .IsRequired(false);
->>>>>>> main
+        //modelBuilder.Entity<User>().HasMany(u => u.Address)
+        //    .WithOne(a => a.User)
+        //    .HasForeignKey(a => a.UserId)
+        //    .IsRequired(false);
 
         base.OnModelCreating(modelBuilder);
     }

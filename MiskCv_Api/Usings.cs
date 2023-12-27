@@ -12,6 +12,7 @@ global using MiskCv_Api.Services.Repositories.UsersRepository;
 
 global using MiskCv_Api.Models;
 global using MiskCv_Api.Dtos;
+global using MiskCv_Api.Dtos.AddressDtos;
 global using MiskCv_Api.Data;
 
 global using Mapster;
