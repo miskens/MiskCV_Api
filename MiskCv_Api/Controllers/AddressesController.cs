@@ -92,7 +92,9 @@ public class AddressesController : ControllerBase
 
         if (newAddress == null) { return Problem("There was a problem adding address"); }
 
-        return CreatedAtAction("GetAddress", new { id = newAddress.Id }, newAddress);
+        var createdAddress = _mapper.Map<AddressCreatedDto>(newAddress);
+
+        return CreatedAtAction("GetAddress", new { id = createdAddress.Id }, createdAddress);
     }
 
     #endregion

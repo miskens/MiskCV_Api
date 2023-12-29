@@ -1,4 +1,6 @@
-﻿namespace MiskCv_Api.Services.Repositories.CompaniesRepository;
+﻿using MiskCv_Api.Models;
+
+namespace MiskCv_Api.Services.Repositories.CompaniesRepository;
 
 public class CompanyRepository : ICompanyRepository
 {
@@ -76,9 +78,17 @@ public class CompanyRepository : ICompanyRepository
 
     #region POST
 
-    public async Task<Company?> CreateCompany(Company company)
+    public async Task<Company?> CreateCompany(Company company, int skillId)
     {
         if (_context.Company == null) { return null; }
+
+        if (skillId > 0)
+        {
+            var skill = await _context.Skill.FindAsync(skillId);
+
+            if (skill != null)
+                company.Skill.Add(skill);
+        }
 
         _context.Company.Add(company);
         await _context.SaveChangesAsync();

@@ -15,5 +15,5 @@ public partial class Skill
     public string Proficiency { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public ICollection<Company>? Company { get; set; }
+    public ICollection<Company> Company { get; set; } = new List<Company>();
 }

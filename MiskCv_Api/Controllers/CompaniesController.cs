@@ -89,10 +89,23 @@ public class CompaniesController : ControllerBase
     {
         var company = _mapper.Map<Company>(companyDto);
 
-        var newCompany = await _companiesRepository.CreateCompany(company);
+        var newCompany = await _companiesRepository.CreateCompany(company, companyDto.SkillId);
         if (newCompany == null) { return Problem("There was a problem adding company"); }
 
-        return CreatedAtAction("GetCompany", new { id = newCompany.Id }, newCompany);
+        try
+        {
+            var createdCompany = _mapper.Map<CompanyCreatedDto>(newCompany);
+
+            return CreatedAtAction("GetCompany", new { id = createdCompany.Id }, createdCompany);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("There was a problem creating skill", ex.Message);
+
+            return Problem(ex.Message);
+        }
+
+        
     }
 
     #endregion

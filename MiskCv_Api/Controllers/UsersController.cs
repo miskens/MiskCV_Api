@@ -84,7 +84,7 @@ public class UsersController : ControllerBase
     // POST: api/Users
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<User>?> PostUser(UserCreateDto userDto)
+    public async Task<ActionResult<UserCreatedDto>?> PostUser(UserCreateDto userDto)
     {
         var user = _mapper.Map<User>(userDto);
 
@@ -92,7 +92,19 @@ public class UsersController : ControllerBase
 
         if (newUser == null) { return null; }
 
-        return CreatedAtAction("GetUser", new { id = newUser.Id }, newUser);
+        try
+        {
+            var createdUser = _mapper.Map<UserCreatedDto>(newUser);
+
+            return CreatedAtAction("GetUser", new { id = createdUser.Id }, createdUser);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("There was a problem creating user", ex.Message);
+            return Problem(ex.Message);
+        }
+
+        
     }
 
     #endregion

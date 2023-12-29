@@ -23,6 +23,7 @@ public partial class Company
     public int SkillId { get; set; }
 
     public string Description { get; set; } = string.Empty;
+
     [JsonIgnore]
-    public ICollection<Skill>? Skill { get; set;}
+    public ICollection<Skill> Skill { get; set;} = new List<Skill>();
 }
