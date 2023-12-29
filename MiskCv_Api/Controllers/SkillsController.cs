@@ -84,15 +84,25 @@ public class SkillsController : ControllerBase
     // POST: api/Skills
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Skill>> PostSkill(SkillCreateDto skillDto)
+    public async Task<ActionResult<SkillCreatedDto>> PostSkill(SkillCreateDto skillDto)
     {
         var skill = _mapper.Map<Skill>(skillDto);
         
-        var newSkill = await _skillRepository.CreateSkill(skill);
+        var newSkill = await _skillRepository.CreateSkill(skill, skillDto.companyId);
 
         if (newSkill == null) { return Problem("There was a problem adding skill"); }
-
-        return CreatedAtAction("GetSkill", new { id = newSkill.Id }, newSkill);
+        
+        try
+        {
+            var createdSkill = _mapper.Map<SkillCreatedDto>(newSkill);
+            
+            return CreatedAtAction("GetSkill", new { id = createdSkill.Id }, createdSkill);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("There was a problem creating skill", ex.Message);
+            return Problem(ex.Message);
+        }
     }
 
     #endregion

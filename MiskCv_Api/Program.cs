@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
+using MiskCv_Api.Mapping;
 
 namespace MiskCv_Api
 {
@@ -12,26 +13,7 @@ namespace MiskCv_Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddSingleton<IMapper, Mapper>();
-
-
-            builder.Services.AddDbContext<MiskCvDbContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("MiskCvDbTEMPConnString"));
-            });
-
-            builder.Services.AddTransient<IUserRepository, UserRepository>();
-            builder.Services.AddTransient<IAddressRepository, AddressRepository>();
-            builder.Services.AddTransient<ICompanyRepository,  CompanyRepository>();
-            builder.Services.AddTransient<ISkillRepository, SkillRepository>(); 
+            builder.Services.AddMiskCVServices(builder.Configuration);
 
             var app = builder.Build();
 

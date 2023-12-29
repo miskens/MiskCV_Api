@@ -1,6 +1,7 @@
 ﻿namespace MiskCv_Api.Dtos.AddressDtos;
 
-public record struct AddressCreateDto(
+public record struct AddressCreatedDto(
+    int Id,
     string Street,
     string PostNr,
     string City,

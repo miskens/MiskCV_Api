@@ -1,8 +1,8 @@
 ﻿namespace MiskCv_Api.Dtos.SkillDtos
 {
-    public record struct SkillDto(
-        int Id,
+    public record struct SkillCreateDto(
         string Name,
-        string Proficiency
+        string Proficiency,
+        int companyId
         );
 }

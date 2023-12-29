@@ -1,10 +1,10 @@
 ﻿namespace MiskCv_Api.Dtos.UserDtos;
 
-public record struct UserCreateDto(
+public record struct UserCreatedDto(
+    int Id,
     string FirstName,
     string LastName,
     string Username,
     DateTime DateOfBirth,
-    string ImageUrl,
     List<UserAddressCreateDto> Address
     );

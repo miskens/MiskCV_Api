@@ -4,7 +4,8 @@ public class SkillRepository : ISkillRepository
 {
     private readonly MiskCvDbContext _context;
 
-    public SkillRepository(MiskCvDbContext context)
+    public SkillRepository(
+            MiskCvDbContext context)
     {
         _context = context;
     }
@@ -80,9 +81,17 @@ public class SkillRepository : ISkillRepository
 
     #region POST
 
-    public async Task<Skill?> CreateSkill(Skill skill)
+    public async Task<Skill?> CreateSkill(Skill skill, int companyId = 0)
     {
-        if (_context.Skill == null) { return null; }
+        if (_context.Skill == null || _context.Company == null) { return null; }
+
+        if(companyId > 0)
+        {
+            var company = await _context.Company.FindAsync(companyId);
+            
+            if (company != null)
+            skill.Company.Add(company);
+        }
 
         _context.Skill.Add(skill);
         await _context.SaveChangesAsync();
