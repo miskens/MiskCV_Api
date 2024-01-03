@@ -18,8 +18,14 @@ namespace MiskCv_Api
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
+            // DI from Mapping folder
             services.AddMappings();
-            //services.AddSingleton<IMapper, Mapper>();
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration.GetConnectionString("MiskRedisConnString");
+                options.InstanceName = "MiskCv_";
+            });
 
             services.AddDbContext<MiskCvDbContext>(options =>
             {
@@ -30,6 +36,9 @@ namespace MiskCv_Api
             services.AddTransient<IAddressRepository, AddressRepository>();
             services.AddTransient<ICompanyRepository, CompanyRepository>();
             services.AddTransient<ISkillRepository, SkillRepository>();
+
+            // Static class
+            DistributedCacheExtension.SetConfiguration(configuration);
 
             return services;
         }

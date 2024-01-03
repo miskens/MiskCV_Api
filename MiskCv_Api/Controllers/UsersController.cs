@@ -1,4 +1,5 @@
 ﻿using MapsterMapper;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace MiskCv_Api.Controllers;
 
@@ -8,14 +9,19 @@ public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly IDistributedCache _cache;
 
     public UsersController(
             IUserRepository userRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IDistributedCache cache)
     {
         _userRepository = userRepository;
         _mapper = mapper;
+        _cache = cache;
     }
+
+    private IEnumerable<User>? userModels;
 
     #region GET
 
@@ -23,7 +29,21 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUser()
     {
-        var userModels = await _userRepository.GetUsers();
+        userModels = null;
+
+        string recordKey = "Users_" + DateTime.Now.ToString("yyyyMMdd_hhmm");
+
+        userModels = await _cache.GetRecordAsync<List<User>>(recordKey);
+
+        if (userModels == null)
+        {
+            userModels = await _userRepository.GetUsers();
+
+            if (userModels != null) 
+            {
+                await _cache.SetRecordAsync<IEnumerable<User>>(recordKey, userModels, null, null);
+            }
+        }        
 
         if (userModels == null)
         {
