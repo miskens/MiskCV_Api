@@ -19,3 +19,4 @@ global using MiskCv_Api.Dtos.UserDtos;
 global using MiskCv_Api.Data;
 
 global using Mapster;
+global using MiskCv_Api.Extensions;
