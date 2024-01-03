@@ -31,7 +31,8 @@ public class UsersController : ControllerBase
     {
         userModels = null;
 
-        string recordKey = "Users_" + DateTime.Now.ToString("yyyyMMdd_hhmm");
+        var actionName = ControllerContext.ActionDescriptor.ActionName;
+        string recordKey = $"{actionName}_AllUsers";
 
         userModels = await _cache.GetRecordAsync<List<User>>(recordKey);
 

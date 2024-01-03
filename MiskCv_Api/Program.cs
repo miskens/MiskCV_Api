@@ -13,6 +13,7 @@ namespace MiskCv_Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Top level DI
             builder.Services.AddMiskCVServices(builder.Configuration);
 
             var app = builder.Build();
