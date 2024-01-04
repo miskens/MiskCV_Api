@@ -62,6 +62,7 @@ This is just a personal project where I create my CV and practice my skills and 
 - [X] Add DTOs
 - [X] Add Mapster and Map Entities to DTOs
 - [X] Add Redis
+- [X] Setup Azure Redis
 - [ ] Add Azure Application Insights logging
 - [ ] Add and configure Azure App registration
 - [ ] Add Microsoft Identity Authentication and Authorization
