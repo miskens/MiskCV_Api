@@ -21,17 +21,15 @@ public class UsersController : ControllerBase
         _cache = cache;
     }
 
-    private IEnumerable<User>? userModels;
-
     #region GET
 
     // GET: api/Users
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUser()
     {
-        userModels = null;
+        IEnumerable<User>? userModels = null;
 
-        var actionName = ControllerContext.ActionDescriptor.ActionName;
+        var actionName = $"{nameof(GetUser)}";
         string recordKey = $"{actionName}_AllUsers";
 
         userModels = await _cache.GetRecordAsync<List<User>>(recordKey);
@@ -42,7 +40,7 @@ public class UsersController : ControllerBase
 
             if (userModels != null) 
             {
-                await _cache.SetRecordAsync<IEnumerable<User>>(recordKey, userModels, null, null);
+                await _cache.SetRecordAsync<IEnumerable<User>>(recordKey, userModels);
             }
         }        
 
@@ -60,7 +58,21 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDto>> GetUser(int id)
     {
-        var userModel = await _userRepository.GetUser(id);
+        User? userModel = null;
+
+        var recordKey = $"User_Id_{ id }";
+
+        userModel = await _cache.GetRecordAsync<User>(recordKey);
+
+        if(userModel == null)
+        {
+            userModel = await _userRepository.GetUser(id);
+
+            if(userModel != null)
+            {
+                await _cache.SetRecordAsync<User>(recordKey, userModel);
+            }
+        }
 
         if (userModel == null)
         {
@@ -81,19 +93,22 @@ public class UsersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutUser(int id, UserUpdateDto userDto)
     {
-        var user = _mapper.Map<User>(userDto);
+        var userModel = _mapper.Map<User>(userDto);
         
-        if (id != user.Id)
+        if (id != userModel.Id)
         {
             return BadRequest();
         }
 
-        var result = await _userRepository.UpdateUser(id, user);
+        var result = await _userRepository.UpdateUser(id, userModel);
 
         if (result == null)
         {
             return Problem("There was a problem updating user");
         }
+
+        var recordKey = $"User_Id_{id}";
+        await _cache.SetRecordAsync<User>(recordKey, userModel);
 
         return NoContent();
     }
@@ -107,15 +122,18 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserCreatedDto>?> PostUser(UserCreateDto userDto)
     {
-        var user = _mapper.Map<User>(userDto);
+        var userModel = _mapper.Map<User>(userDto);
 
-        var newUser = await _userRepository.CreateUser(user);
+        userModel = await _userRepository.CreateUser(userModel);
 
-        if (newUser == null) { return null; }
+        if (userModel == null) { return null; }
 
         try
         {
-            var createdUser = _mapper.Map<UserCreatedDto>(newUser);
+            var recordKey = $"User_Id_{userModel.Id}";
+            await _cache.SetRecordAsync<User>(recordKey, userModel);
+
+            var createdUser = _mapper.Map<UserCreatedDto>(userModel);
 
             return CreatedAtAction("GetUser", new { id = createdUser.Id }, createdUser);
         }

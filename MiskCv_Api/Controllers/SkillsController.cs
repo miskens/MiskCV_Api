@@ -1,4 +1,5 @@
 ﻿using MapsterMapper;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace MiskCv_Api.Controllers;
 
@@ -8,13 +9,16 @@ public class SkillsController : ControllerBase
 {
     private readonly ISkillRepository _skillRepository;
     private readonly IMapper _mapper;
+    private readonly IDistributedCache _cache;
 
     public SkillsController(
             ISkillRepository skillRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IDistributedCache cache)
     {
         _skillRepository = skillRepository;
         _mapper = mapper;
+        _cache = cache;
     }
 
     #region GET
@@ -23,7 +27,22 @@ public class SkillsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SkillDto>>> GetSkill()
     {
-        var skillModels = await _skillRepository.GetSkills();
+        IEnumerable<Skill>? skillModels = null;
+
+        var actionName = $"{nameof(GetSkill)}";
+        var recordKey = $"{actionName}_AllSkills";
+
+        skillModels = await _cache.GetRecordAsync<IEnumerable<Skill>>(recordKey);
+
+        if(skillModels == null )
+        {
+            skillModels = await _skillRepository.GetSkills();
+
+            if (skillModels != null)
+            {
+                await _cache.SetRecordAsync(recordKey, skillModels);
+            }
+        }
 
         if (skillModels == null)
         {
@@ -39,7 +58,21 @@ public class SkillsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<SkillDto>> GetSkill(int id)
     {
-        var skillModel = await _skillRepository.GetSkill(id);
+        Skill? skillModel = null;
+
+        var recordKey = $"Skill_Id_{id}";
+
+        skillModel = await _cache.GetRecordAsync<Skill>(recordKey);
+
+        if (skillModel == null )
+        {
+            skillModel = await _skillRepository.GetSkill(id);
+
+            if (skillModel != null)
+            {
+                await _cache.SetRecordAsync(recordKey, skillModel);
+            }
+        }
 
         if (skillModel == null)
         {
@@ -74,6 +107,9 @@ public class SkillsController : ControllerBase
             return Problem("There was a problem updating skill");
         }
 
+        var recordKey = $"Skill_Id_{result.Id}";
+        await _cache.SetRecordAsync<Skill>(recordKey, skill);
+
         return NoContent();
     }
 
@@ -86,11 +122,17 @@ public class SkillsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<SkillCreatedDto>> PostSkill(SkillCreateDto skillDto)
     {
-        var skill = _mapper.Map<Skill>(skillDto);
+        var skillModel = _mapper.Map<Skill>(skillDto);
         
-        var newSkill = await _skillRepository.CreateSkill(skill, skillDto.companyId);
+        var newSkill = await _skillRepository.CreateSkill(skillModel, skillDto.companyId);
 
-        if (newSkill == null) { return Problem("There was a problem adding skill"); }
+        if (newSkill == null) 
+        { 
+            return Problem("There was a problem adding skill"); 
+        }
+
+        var recordKey = $"Skill_Id_{newSkill.Id}";
+        await _cache.SetRecordAsync<Skill>(recordKey , newSkill);
         
         try
         {
