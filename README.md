@@ -64,7 +64,8 @@ This is just a personal project where I create my CV and practice my skills and 
 - [X] Add Redis
 - [X] Setup Azure Redis
 - [ ] Add Azure Application Insights logging
-- [ ] Add and configure Azure App registration
+- [X] Add and configure Azure App registration
+- [X] Setup Azure Key vault (for App registration secret)
 - [ ] Add Microsoft Identity Authentication and Authorization
 - [ ] Configure Docker
 - [ ] Continue with building frontend with React, RTK, Typescript in a project called MiskCv_React_RTK_TS
