@@ -1,4 +1,6 @@
 ﻿using MapsterMapper;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace MiskCv_Api.Controllers;
 
@@ -8,13 +10,16 @@ public class AddressesController : ControllerBase
 {
     private readonly IAddressRepository _addressRepository;
     private readonly IMapper _mapper;
+    private readonly IDistributedCache _cache;
 
     public AddressesController(
             IAddressRepository addressRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IDistributedCache cache)
     {
         _addressRepository = addressRepository;
         _mapper = mapper;
+        _cache = cache;
     }
 
     #region GET
@@ -23,7 +28,22 @@ public class AddressesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AddressDto>>> GetAddress()
     {
-        var addressModels = await _addressRepository.GetAddresses();
+        IEnumerable<Address>? addressModels = null;
+
+        var actionName = $"{nameof(GetAddress)}";
+        var recordKey = $"{actionName}_AllAddresses";
+
+        addressModels = await _cache.GetRecordAsync<List<Address>>(recordKey);
+
+        if(addressModels == null)
+        {
+            addressModels = await _addressRepository.GetAddresses();
+
+            if (addressModels != null)
+            {
+                await _cache.SetRecordAsync<IEnumerable<Address>>(recordKey, addressModels);
+            }
+        }
 
         if (addressModels == null)
         {
@@ -39,16 +59,30 @@ public class AddressesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<AddressDto>> GetAddress(int id)
     {
-        var addressModel = await _addressRepository.GetAddress(id);
+        Address? addressModel = null;
+
+        var recordKey = $"Address_Id_{id}";
+
+        addressModel = await _cache.GetRecordAsync<Address>(recordKey);
+
+        if(addressModel == null)
+        {
+            addressModel = await _addressRepository.GetAddress(id);
+
+            if (addressModel != null)
+            {
+                await _cache.SetRecordAsync<Address>(recordKey, addressModel);
+            }
+        }
 
         if (addressModel == null)
         {
             return NotFound();
         }
 
-        var address = _mapper.Map<AddressDto>(addressModel);
+        var addressDto = _mapper.Map<AddressDto>(addressModel);
 
-        return address;
+        return addressDto;
     }
 
     #endregion
@@ -60,19 +94,23 @@ public class AddressesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutAddress(int id, AddressUpdateDto addressDto)
     {
-        var address = _mapper.Map<Address>(addressDto);
+        var addressModel = _mapper.Map<Address>(addressDto);
 
-        if (id != address.Id)
+        if (id != addressModel.Id)
         {
             return BadRequest();
         }
 
-        var result = await _addressRepository.UpdateAddress(id, address);
+        var result = await _addressRepository.UpdateAddress(id, addressModel);
 
         if (result == null)
         {
             return Problem("There was a problem updating address");
         }
+
+        var recordKey = $"Address_Id_{id}";
+
+        await _cache.SetRecordAsync<Address>(recordKey, addressModel);
 
         return NoContent();
     }
@@ -86,11 +124,18 @@ public class AddressesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Address>> PostAddress(AddressCreateDto addressDto)
     {
-        var address = _mapper.Map<Address>(addressDto);
+        var addressModel = _mapper.Map<Address>(addressDto);
 
-        var newAddress = await _addressRepository.CreateAddress(address);
+        var newAddress = await _addressRepository.CreateAddress(addressModel);
 
-        if (newAddress == null) { return Problem("There was a problem adding address"); }
+        if (newAddress == null) 
+        { 
+            return Problem("There was a problem adding address"); 
+        }
+
+        var recordKey = $"Address_Id_{ newAddress.Id }";
+
+        await _cache.SetRecordAsync<Address>(recordKey, newAddress);
 
         var createdAddress = _mapper.Map<AddressCreatedDto>(newAddress);
 

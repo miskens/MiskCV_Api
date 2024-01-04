@@ -1,4 +1,6 @@
 ﻿using MapsterMapper;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Graph.Drives.Item.Items.Item.Workbook.Functions.Ceiling_Math;
 
 namespace MiskCv_Api.Controllers;
@@ -9,13 +11,16 @@ public class CompaniesController : ControllerBase
 {
     private readonly ICompanyRepository _companiesRepository;
     private readonly IMapper _mapper;
+    private readonly IDistributedCache _cache;
 
     public CompaniesController(
             ICompanyRepository companiesRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IDistributedCache cache)
     {
         _companiesRepository = companiesRepository;
         _mapper = mapper;
+        _cache = cache;
     }
 
     #region GET
@@ -24,7 +29,22 @@ public class CompaniesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompany()
     {
-        var companyModels = await _companiesRepository.GetCompanies();
+        IEnumerable<Company>? companyModels = null;
+
+        var actionName = $"{nameof(GetCompany)}";
+        var recordKey = $"{ actionName }_AllCompanies";
+
+        companyModels = await _cache.GetRecordAsync<IEnumerable<Company>>(recordKey);
+
+        if (companyModels == null )
+        {
+            companyModels = await _companiesRepository.GetCompanies();
+
+            if (companyModels != null )
+            {
+                await _cache.SetRecordAsync<IEnumerable<Company>>(recordKey, companyModels);
+            }
+        }
 
         if (companyModels == null)
         {
@@ -40,7 +60,21 @@ public class CompaniesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<CompanyDto>> GetCompany(int id)
     {
-        var companyModel = await _companiesRepository.GetCompany(id);
+        Company? companyModel = null;
+
+        var recordKey = $"Company_Id_{id}";
+
+        companyModel = await _cache.GetRecordAsync<Company>(recordKey);
+
+        if (companyModel == null)
+        {
+            companyModel = await _companiesRepository.GetCompany(id);
+
+            if (companyModel != null)
+            {
+                await _cache.SetRecordAsync<Company>(recordKey, companyModel);
+            }
+        }
 
         if (companyModel == null)
         {
@@ -75,6 +109,10 @@ public class CompaniesController : ControllerBase
             return Problem("There was a problem updating company");
         }
 
+        var recordKey = $"Company_Id_{result.Id}";
+
+        await _cache.SetRecordAsync<Company>(recordKey, result);
+
         return NoContent();
     }
 
@@ -87,10 +125,18 @@ public class CompaniesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Company>?> PostCompany(CompanyCreateDto companyDto)
     {
-        var company = _mapper.Map<Company>(companyDto);
+        var companyModel = _mapper.Map<Company>(companyDto);
 
-        var newCompany = await _companiesRepository.CreateCompany(company, companyDto.SkillId);
-        if (newCompany == null) { return Problem("There was a problem adding company"); }
+        var newCompany = await _companiesRepository.CreateCompany(companyModel, companyDto.SkillId);
+
+        if (newCompany == null) 
+        { 
+            return Problem("There was a problem adding company"); 
+        }
+
+        var recordKey = $"Company_Id_{newCompany.Id}";
+
+        await _cache.SetRecordAsync<Company>(recordKey, newCompany);
 
         try
         {
