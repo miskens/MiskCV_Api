@@ -127,20 +127,18 @@ public class CompaniesController : ControllerBase
     {
         var companyModel = _mapper.Map<Company>(companyDto);
 
-        var newCompany = await _companiesRepository.CreateCompany(companyModel, companyDto.SkillId);
+        companyModel = await _companiesRepository.CreateCompany(companyModel, companyDto.SkillId);
 
-        if (newCompany == null) 
+        if (companyModel == null) 
         { 
             return Problem("There was a problem adding company"); 
         }
 
-        var recordKey = $"Company_Id_{newCompany.Id}";
-
-        await _cache.SetRecordAsync<Company>(recordKey, newCompany);
-
         try
         {
-            var createdCompany = _mapper.Map<CompanyCreatedDto>(newCompany);
+            var createdCompany = _mapper.Map<CompanyCreatedDto>(companyModel);
+            var recordKey = $"Company_Id_{companyModel.Id}";
+            await _cache.SetRecordAsync<Company>(recordKey, companyModel);
 
             return CreatedAtAction("GetCompany", new { id = createdCompany.Id }, createdCompany);
         }
