@@ -23,7 +23,7 @@ namespace MiskCv_Api
 
             services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = configuration.GetConnectionString("MiskRedisConnString");
+                options.Configuration = configuration.GetConnectionString("RedisMiskConnString");
                 options.InstanceName = "MiskCv_";
             });
 

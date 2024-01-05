@@ -126,20 +126,27 @@ public class AddressesController : ControllerBase
     {
         var addressModel = _mapper.Map<Address>(addressDto);
 
-        var newAddress = await _addressRepository.CreateAddress(addressModel);
+        addressModel = await _addressRepository.CreateAddress(addressModel);
 
-        if (newAddress == null) 
+        if (addressModel == null) 
         { 
             return Problem("There was a problem adding address"); 
         }
 
-        var recordKey = $"Address_Id_{ newAddress.Id }";
+        try
+        {
+            var createdAddress = _mapper.Map<AddressCreatedDto>(addressModel);
+            var recordKey = $"Address_Id_{addressModel.Id}";
+            await _cache.SetRecordAsync<Address>(recordKey, addressModel);
 
-        await _cache.SetRecordAsync<Address>(recordKey, newAddress);
+            return CreatedAtAction("GetAddress", new { id = createdAddress.Id }, createdAddress);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("There was a problem creating skill", ex.Message);
 
-        var createdAddress = _mapper.Map<AddressCreatedDto>(newAddress);
-
-        return CreatedAtAction("GetAddress", new { id = createdAddress.Id }, createdAddress);
+            return Problem(ex.Message);
+        }
     }
 
     #endregion

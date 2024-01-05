@@ -130,10 +130,9 @@ public class UsersController : ControllerBase
 
         try
         {
+            var createdUser = _mapper.Map<UserCreatedDto>(userModel);
             var recordKey = $"User_Id_{userModel.Id}";
             await _cache.SetRecordAsync<User>(recordKey, userModel);
-
-            var createdUser = _mapper.Map<UserCreatedDto>(userModel);
 
             return CreatedAtAction("GetUser", new { id = createdUser.Id }, createdUser);
         }
@@ -142,8 +141,6 @@ public class UsersController : ControllerBase
             Console.WriteLine("There was a problem creating user", ex.Message);
             return Problem(ex.Message);
         }
-
-        
     }
 
     #endregion

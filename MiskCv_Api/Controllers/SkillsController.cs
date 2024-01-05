@@ -124,20 +124,19 @@ public class SkillsController : ControllerBase
     {
         var skillModel = _mapper.Map<Skill>(skillDto);
         
-        var newSkill = await _skillRepository.CreateSkill(skillModel, skillDto.companyId);
+        skillModel = await _skillRepository.CreateSkill(skillModel, skillDto.companyId);
 
-        if (newSkill == null) 
+        if (skillModel == null) 
         { 
             return Problem("There was a problem adding skill"); 
         }
-
-        var recordKey = $"Skill_Id_{newSkill.Id}";
-        await _cache.SetRecordAsync<Skill>(recordKey , newSkill);
         
         try
         {
-            var createdSkill = _mapper.Map<SkillCreatedDto>(newSkill);
-            
+            var createdSkill = _mapper.Map<SkillCreatedDto>(skillModel);
+            var recordKey = $"Skill_Id_{skillModel.Id}";
+            await _cache.SetRecordAsync<Skill>(recordKey, skillModel);
+
             return CreatedAtAction("GetSkill", new { id = createdSkill.Id }, createdSkill);
         }
         catch(Exception ex)
