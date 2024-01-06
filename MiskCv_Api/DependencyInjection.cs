@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
 using MiskCv_Api.Mapping;
+using MiskCv_Api.Services.Repositories.IdentityUserRepository;
 
 namespace MiskCv_Api
 {
@@ -10,6 +12,12 @@ namespace MiskCv_Api
     {
         public static IServiceCollection AddMiskCVServices(this IServiceCollection services, ConfigurationManager configuration)
         {
+            var connectionString = configuration.GetConnectionString("IdentityConnString") ?? throw new InvalidOperationException("Connection string 'IdentityConnString' not found.");
+
+            services.AddDbContext<MiskIdentityDbContext>(options => options.UseSqlServer(connectionString));
+
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<MiskIdentityDbContext>();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
 
@@ -31,6 +39,8 @@ namespace MiskCv_Api
             {
                 options.UseSqlServer(configuration.GetConnectionString("MiskCvDbTEMPConnString"));
             });
+
+            services.AddScoped<IUserManager, UserManager>();
 
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IAddressRepository, AddressRepository>();
