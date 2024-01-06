@@ -9,14 +9,4 @@ public class MiskCvDbContext: DbContext
     public DbSet<Skill> Skill { get; set; } = default!;
     public DbSet<Company> Company { get; set; } = default!;
     public DbSet<Address> Address { get; set; } = default!;
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        //modelBuilder.Entity<User>().HasMany(u => u.Address)
-        //    .WithOne(a => a.User)
-        //    .HasForeignKey(a => a.UserId)
-        //    .IsRequired(false);
-
-        base.OnModelCreating(modelBuilder);
-    }
 }
