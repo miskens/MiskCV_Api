@@ -1,3 +1,5 @@
-﻿namespace MiskCv_Api.Dtos.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
-public record struct RegisterDto(string UserName, string Email, string Password, string ConfirmEmail);
+namespace MiskCv_Api.Dtos.Identity;
+
+public record struct RegisterDto(string UserName, string Email, string Password, string ConfirmPassword);

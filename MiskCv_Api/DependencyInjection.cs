@@ -1,10 +1,14 @@
 ﻿using System.Reflection;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 using MiskCv_Api.Mapping;
 using MiskCv_Api.Services.Repositories.IdentityUserRepository;
+using MiskCv_Api.Services.AzureServices;
+using MiskCv_Api.Extensions.DistributedCache;
 
 namespace MiskCv_Api
 {
@@ -21,6 +25,7 @@ namespace MiskCv_Api
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
 
+            //services.AddMvc();
             services.AddControllers();
             
             services.AddEndpointsApiExplorer();
@@ -40,6 +45,7 @@ namespace MiskCv_Api
                 options.UseSqlServer(configuration.GetConnectionString("MiskCvDbTEMPConnString"));
             });
 
+            services.AddSingleton<IAzureAuthenticationService, AzureAuthenticationService>();
             services.AddScoped<IUserManager, UserManager>();
 
             services.AddTransient<IUserRepository, UserRepository>();

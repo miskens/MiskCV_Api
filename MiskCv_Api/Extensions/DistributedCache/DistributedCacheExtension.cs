@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace MiskCv_Api.Extensions;
+namespace MiskCv_Api.Extensions.DistributedCache;
 
 public static class DistributedCacheExtension
 {
@@ -18,15 +18,15 @@ public static class DistributedCacheExtension
 
         var jsonData = await cache.GetStringAsync(recordId);
 
-        if (jsonData == null) return default(T)!;
+        if (jsonData == null) return default!;
 
         return JsonSerializer.Deserialize<T>(jsonData)!;
     }
 
     public static async Task SetRecordAsync<T>(
-                                this IDistributedCache cache, 
-                                string recordId, 
-                                T data, 
+                                this IDistributedCache cache,
+                                string recordId,
+                                T data,
                                 TimeSpan? absoluteExpireTime = null,
                                 TimeSpan? unusedExpireTime = null)
     {
@@ -36,7 +36,7 @@ public static class DistributedCacheExtension
         var options = new DistributedCacheEntryOptions();
 
         options.AbsoluteExpirationRelativeToNow = absoluteExpireTime ?? TimeSpan.FromSeconds(absoluteExpireTimeDefault);
-        options.SlidingExpiration = unusedExpireTime ?? TimeSpan.FromSeconds(slidingExpireTimeDefault); 
+        options.SlidingExpiration = unusedExpireTime ?? TimeSpan.FromSeconds(slidingExpireTimeDefault);
 
         var jsonData = JsonSerializer.Serialize(data);
         await cache.SetStringAsync(recordId, jsonData, options);

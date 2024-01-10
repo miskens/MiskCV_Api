@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Graph.Drives.Item.Items.Item.Workbook.Functions.Ceiling_Math;
+using MiskCv_Api.Extensions.DistributedCache;
 
 namespace MiskCv_Api.Controllers;
 
@@ -93,7 +94,7 @@ public class CompaniesController : ControllerBase
     // PUT: api/Companies/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutCompany(int id, CompanyUpdateDto companyDto)
+    public async Task<IActionResult> PutCompany([FromBody] CompanyUpdateDto companyDto, int id)
     {
         var company = _mapper.Map<Company>(companyDto);
 
@@ -123,7 +124,7 @@ public class CompaniesController : ControllerBase
     // POST: api/Companies
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Company>?> PostCompany(CompanyCreateDto companyDto)
+    public async Task<ActionResult<Company>?> PostCompany([FromBody] CompanyCreateDto companyDto)
     {
         var companyModel = _mapper.Map<Company>(companyDto);
 

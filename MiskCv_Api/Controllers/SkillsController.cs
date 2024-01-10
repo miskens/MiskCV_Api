@@ -1,5 +1,6 @@
 ﻿using MapsterMapper;
 using Microsoft.Extensions.Caching.Distributed;
+using MiskCv_Api.Extensions.DistributedCache;
 
 namespace MiskCv_Api.Controllers;
 
@@ -91,7 +92,7 @@ public class SkillsController : ControllerBase
     // PUT: api/Skills/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutSkill(int id, SkillUpdateDto skillDto)
+    public async Task<IActionResult> PutSkill([FromBody] SkillUpdateDto skillDto, int id)
     {
         var skill = _mapper.Map<Skill>(skillDto);
 
@@ -120,7 +121,7 @@ public class SkillsController : ControllerBase
     // POST: api/Skills
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<SkillCreatedDto>> PostSkill(SkillCreateDto skillDto)
+    public async Task<ActionResult<SkillCreatedDto>> PostSkill([FromBody] SkillCreateDto skillDto)
     {
         var skillModel = _mapper.Map<Skill>(skillDto);
         

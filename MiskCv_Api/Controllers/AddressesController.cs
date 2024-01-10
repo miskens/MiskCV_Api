@@ -1,6 +1,7 @@
 ﻿using MapsterMapper;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Extensions.Caching.Distributed;
+using MiskCv_Api.Extensions.DistributedCache;
 
 namespace MiskCv_Api.Controllers;
 
@@ -92,7 +93,7 @@ public class AddressesController : ControllerBase
     // PUT: api/Addresses/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutAddress(int id, AddressUpdateDto addressDto)
+    public async Task<IActionResult> PutAddress([FromBody] AddressUpdateDto addressDto, int id)
     {
         var addressModel = _mapper.Map<Address>(addressDto);
 
@@ -122,7 +123,7 @@ public class AddressesController : ControllerBase
     // POST: api/Addresses
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Address>> PostAddress(AddressCreateDto addressDto)
+    public async Task<ActionResult<Address>> PostAddress([FromBody] AddressCreateDto addressDto)
     {
         var addressModel = _mapper.Map<Address>(addressDto);
 
