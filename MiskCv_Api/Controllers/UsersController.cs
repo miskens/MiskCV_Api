@@ -1,5 +1,6 @@
 ﻿using MapsterMapper;
 using Microsoft.Extensions.Caching.Distributed;
+using MiskCv_Api.Extensions.DistributedCache;
 
 namespace MiskCv_Api.Controllers;
 
@@ -91,7 +92,7 @@ public class UsersController : ControllerBase
     // PUT: api/Users/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutUser(int id, UserUpdateDto userDto)
+    public async Task<IActionResult> PutUser([FromBody] UserUpdateDto userDto, int id)
     {
         var userModel = _mapper.Map<User>(userDto);
         
@@ -120,7 +121,7 @@ public class UsersController : ControllerBase
     // POST: api/Users
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<UserCreatedDto>?> PostUser(UserCreateDto userDto)
+    public async Task<ActionResult<UserCreatedDto>?> PostUser([FromBody] UserCreateDto userDto)
     {
         var userModel = _mapper.Map<User>(userDto);
 

@@ -4,5 +4,6 @@ namespace MiskCv_Api.Services.Repositories.IdentityUserRepository;
 
 public interface IUserManager
 {
-    Task<IdentityResult>? CreateIdentityUserAsync(IdentityUser user, string password);
+    Task<IdentityUser?> FindByName(string userName);
+    Task<IdentityResult>? CreateIdentityUserAsync(IdentityUser user);
 }

@@ -7,6 +7,9 @@ using MiskCv_Api.Mapping;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
+using MiskCv_Api.Services.AzureServices;
+using Microsoft.Extensions.Caching.Distributed;
+using MiskCv_Api.Extensions.DistributedCache;
 
 namespace MiskCv_Api
 {
@@ -34,10 +37,12 @@ namespace MiskCv_Api
 
             app.UseAuthorization();
 
+            Task SaveAccessTokenTask = AppAccessTokenHandler.AddAppAccessTokenAsync(app);
+            SaveAccessTokenTask.Wait();
 
             app.MapControllers();
 
             app.Run();
         }
-    }
+    }   
 }
