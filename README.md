@@ -66,7 +66,8 @@ This is just a personal project where I create my CV and practice my skills and 
 - [ ] Add Azure Application Insights logging
 - [X] Add and configure Azure App registration
 - [X] Setup Azure Key vault (for App registration secret)
-- [ ] Add Microsoft Identity Authentication and Authorization
+- [X] Set up Azure App Authentication and storing app token 
+- [X] Add Microsoft Identity Authentication and Authorization
 - [ ] Configure Docker
 - [ ] Continue with building frontend with React, RTK, Typescript in a project called MiskCv_React_RTK_TS
 - [ ] Configure and setup Azure webapps, app insights and whatnot
