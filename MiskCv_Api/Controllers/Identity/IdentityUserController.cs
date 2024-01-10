@@ -80,20 +80,6 @@ public class IdentityUserController: ControllerBase
         return Ok("Logged in");
     }
 
-    [HttpPost("loginAz")]
-    public async Task<IActionResult> LoginAz()
-    {
-        var app = ConfidentialClientApplicationBuilder.Create(_configuration["AzureAd:ClientId"])
-            .WithClientSecret(_configuration["AzureAd:ClientSecret"])
-            .WithAuthority(new Uri($"https://login.microsoftonline.com/{ _configuration["AzureAd:TenantId"] }"))
-            .Build();
-
-        var result = await app.AcquireTokenForClient(new[] { "api://366d0308-69a6-40de-9eb7-f71f6c1539d7/.default" })
-            .ExecuteAsync();
-
-        return Ok(result.AccessToken);
-    }
-
     #endregion
 
     #region Helpers
