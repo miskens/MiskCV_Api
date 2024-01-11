@@ -1,9 +1,12 @@
 ﻿using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using MiskCv_Api.Dtos.Identity;
+using MiskCv_Api.Extensions.DistributedCache;
+using MiskCv_Api.Services;
 using MiskCv_Api.Services.Repositories.IdentityUserRepository;
 using NuGet.Configuration;
 
@@ -15,11 +18,19 @@ public class IdentityUserController: ControllerBase
 {
     private readonly IUserManager _userManager;
     private readonly IConfiguration _configuration;
+    private readonly IJwtService _jwtservice;
+    private readonly IDistributedCache _cache;
 
-    public IdentityUserController(IUserManager userManager, IConfiguration configuration)
+    public IdentityUserController(
+        IUserManager userManager, 
+        IConfiguration configuration, 
+        IJwtService jwtService, 
+        IDistributedCache cache)
     {
         _userManager = userManager;
         _configuration = configuration;
+        _jwtservice = jwtService;
+        _cache = cache;
     }
 
     #region Register
@@ -77,21 +88,34 @@ public class IdentityUserController: ControllerBase
             return Unauthorized("Incorrect password");
         }
 
-        return Ok("Logged in");
+        if (user.UserName != null)
+        {
+            var token = _jwtservice.GenerateToken(user.Id, user.UserName);
+
+            if(token != null)
+            {
+                await _cache.SetRecordAsync<string>($"Jwt_User_{user.Id}", token);
+                return Ok(token);
+            } 
+        }
+
+        return Problem("Unable to login user.");
     }
 
-    [HttpPost("loginAz")]
-    public async Task<IActionResult> LoginAz()
+    #endregion
+
+    #region Logout
+
+    [HttpPost]
+    [Route("logout")]
+    public async Task<IActionResult> Logout()
     {
-        var app = ConfidentialClientApplicationBuilder.Create(_configuration["AzureAd:ClientId"])
-            .WithClientSecret(_configuration["AzureAd:ClientSecret"])
-            .WithAuthority(new Uri($"https://login.microsoftonline.com/{ _configuration["AzureAd:TenantId"] }"))
-            .Build();
+        // Implement token revocation
 
-        var result = await app.AcquireTokenForClient(new[] { "api://366d0308-69a6-40de-9eb7-f71f6c1539d7/.default" })
-            .ExecuteAsync();
+        // Clear server-side token data
+        // ...
 
-        return Ok(result.AccessToken);
+        return Ok(new { message = "Logout successful" });
     }
 
     #endregion

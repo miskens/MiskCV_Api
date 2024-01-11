@@ -25,6 +25,15 @@ public static class AppAccessTokenHandler
                                 T data)
     {
         var jsonData = JsonSerializer.Serialize(data);
-        await cache.SetStringAsync(recordId, jsonData);
+
+        try
+        {
+            await cache.SetStringAsync(recordId, jsonData);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("Unable to connect to Redis", ex);
+        }
+        
     }
 }

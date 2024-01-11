@@ -5,7 +5,8 @@
 
 #Added by Misk
 Migrations/
-
+Areas/
+Pages/
 
 # User-specific files
 *.rsuser
