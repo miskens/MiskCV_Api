@@ -9,6 +9,7 @@ using MiskCv_Api.Mapping;
 using MiskCv_Api.Services.Repositories.IdentityUserRepository;
 using MiskCv_Api.Services.AzureServices;
 using MiskCv_Api.Extensions.DistributedCache;
+using MiskCv_Api.Services;
 
 namespace MiskCv_Api
 {
@@ -27,7 +28,7 @@ namespace MiskCv_Api
 
             //services.AddMvc();
             services.AddControllers();
-            
+
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
@@ -46,6 +47,10 @@ namespace MiskCv_Api
             });
 
             services.AddSingleton<IAzureAuthenticationService, AzureAuthenticationService>();
+            services.AddSingleton<IJwtService>(new JwtService(
+                                                configuration["Jwt:Key"]!,
+                                                configuration["Jwt:Issuer"]!,
+                                                configuration["Jwt:Audience"]!));
             services.AddScoped<IUserManager, UserManager>();
 
             services.AddTransient<IUserRepository, UserRepository>();
