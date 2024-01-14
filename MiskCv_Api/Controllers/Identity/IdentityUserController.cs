@@ -1,14 +1,8 @@
 ﻿using System.Security.Claims;
 using System.Security.Cryptography;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using MiskCv_Api.Dtos.Identity;
-using MiskCv_Api.Services;
-using MiskCv_Api.Services.DistributedCacheService;
-using StackExchange.Redis;
 
 namespace MiskCv_Api.Controllers.Identity;
 
@@ -16,7 +10,6 @@ namespace MiskCv_Api.Controllers.Identity;
 [ApiController]
 public class IdentityUserController: ControllerBase
 {
-    //private readonly IUserManager _userManager;
     private UserManager<IdentityUser> _userManager;
     private readonly IJwtService _jwtservice;
     private readonly IDistributedCachingService _cache;

@@ -1,8 +1,4 @@
-﻿using MapsterMapper;
-using Microsoft.Extensions.Caching.Distributed;
-using MiskCv_Api.Services.DistributedCacheService;
-
-namespace MiskCv_Api.Controllers;
+﻿namespace MiskCv_Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

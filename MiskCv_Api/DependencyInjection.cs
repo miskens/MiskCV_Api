@@ -19,16 +19,10 @@ namespace MiskCv_Api
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<MiskIdentityDbContext>();
 
-            services.AddAuthentication(options =>
-            {
-                //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-            })
-                .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
+            services.AddAuthentication(options => options.DefaultScheme = IdentityConstants.ApplicationScheme)
+            .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
 
-            //services.AddMvc();
             services.AddControllers();
-
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
@@ -47,7 +41,6 @@ namespace MiskCv_Api
             });
 
             services.AddSingleton<IAzureAuthenticationService, AzureAuthenticationService>();
-
             services.AddSingleton<IDistributedCachingService, DistributedCachingService>();
             services.AddSingleton<IJwtService, JwtService>();
 
@@ -55,9 +48,6 @@ namespace MiskCv_Api
             services.AddTransient<IAddressRepository, AddressRepository>();
             services.AddTransient<ICompanyRepository, CompanyRepository>();
             services.AddTransient<ISkillRepository, SkillRepository>();
-
-            // Static class
-            //DistributedCacheExtension.SetConfiguration(configuration);
 
             return services;
         }

@@ -5,7 +5,12 @@ global using Microsoft.AspNetCore.Mvc;
 global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;
 global using System.Text.Json.Serialization;
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authorization;
+global using MapsterMapper;
 
+global using MiskCv_Api.Services;
+global using MiskCv_Api.Services.DistributedCacheService;
 global using MiskCv_Api.Services.Repositories.AddressesRepository;
 global using MiskCv_Api.Services.Repositories.CompaniesRepository;
 global using MiskCv_Api.Services.Repositories.SkillsRepository;
