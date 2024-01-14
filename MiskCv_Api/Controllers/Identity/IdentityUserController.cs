@@ -1,14 +1,13 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using MiskCv_Api.Dtos.Identity;
-using MiskCv_Api.Extensions.DistributedCache;
 using MiskCv_Api.Services;
-using MiskCv_Api.Services.Repositories.IdentityUserRepository;
-using NuGet.Configuration;
+using MiskCv_Api.Services.DistributedCacheService;
 
 namespace MiskCv_Api.Controllers.Identity;
 
@@ -16,19 +15,17 @@ namespace MiskCv_Api.Controllers.Identity;
 [ApiController]
 public class IdentityUserController: ControllerBase
 {
-    private readonly IUserManager _userManager;
-    private readonly IConfiguration _configuration;
+    //private readonly IUserManager _userManager;
+    private UserManager<IdentityUser> _userManager;
     private readonly IJwtService _jwtservice;
-    private readonly IDistributedCache _cache;
+    private readonly IDistributedCachingService _cache;
 
     public IdentityUserController(
-        IUserManager userManager, 
-        IConfiguration configuration, 
-        IJwtService jwtService, 
-        IDistributedCache cache)
+        UserManager<IdentityUser> userManager,
+        IJwtService jwtService,
+        IDistributedCachingService cache)
     {
         _userManager = userManager;
-        _configuration = configuration;
         _jwtservice = jwtService;
         _cache = cache;
     }
@@ -53,7 +50,7 @@ public class IdentityUserController: ControllerBase
             PasswordHash = hashedPassword
         };
 
-        var result = await _userManager.CreateIdentityUserAsync(user)!;
+        var result = await _userManager.CreateAsync(user)!;
 
         if(result == null)
         {
@@ -77,7 +74,7 @@ public class IdentityUserController: ControllerBase
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var user = await _userManager.FindByName(loginDto.UserName);
+        var user = await _userManager.FindByNameAsync(loginDto.UserName);
 
         if (user == null || user.PasswordHash == null) { return NotFound(); }
 
@@ -92,7 +89,24 @@ public class IdentityUserController: ControllerBase
         {
             var token = _jwtservice.GenerateToken(user.Id, user.UserName);
 
-            if(token != null)
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email ?? "")
+            };
+
+            foreach (var role in await _userManager.GetRolesAsync(user))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var claimsIdentity = new ClaimsIdentity(claims, "login");
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+            await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, claimsPrincipal);
+
+            if (token != null)
             {
                 await _cache.SetRecordAsync<string>($"Jwt_User_{user.Id}", token);
                 return Ok(token);
@@ -110,12 +124,22 @@ public class IdentityUserController: ControllerBase
     [Route("logout")]
     public async Task<IActionResult> Logout()
     {
-        // Implement token revocation
+        var user = await _userManager.FindByNameAsync(User!.Identity!.Name!);
+        
+        if(user != null)
+        {
+            var token = await _cache.GetRecordAsync<string>($"Jwt_User_{user.Id}");
 
-        // Clear server-side token data
-        // ...
+            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
-        return Ok(new { message = "Logout successful" });
+            await _jwtservice.RevokeToken(user.Id, token);
+
+            HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+
+            return Ok(new { message = "Logout successful" });
+        }
+
+        return BadRequest($"Logout failed for user: {User.Identity.Name}");
     }
 
     #endregion

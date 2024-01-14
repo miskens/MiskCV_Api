@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using MiskCv_Api.Services.AzureServices;
 
-namespace MiskCv_Api.Extensions.DistributedCache;
+namespace MiskCv_Api.Services;
 
 public static class AppAccessTokenHandler
 {
@@ -15,8 +15,7 @@ public static class AppAccessTokenHandler
         if (accessToken == null) { return; }
 
         var distributedCacheService = app.Services.GetRequiredService<IDistributedCache>();
-        await SetAppAccessTokenAsync<string>(
-            distributedCacheService,
+        await distributedCacheService.SetAppAccessTokenAsync(
             "appAccessToken", accessToken);
     }
     public static async Task SetAppAccessTokenAsync<T>(
@@ -30,10 +29,10 @@ public static class AppAccessTokenHandler
         {
             await cache.SetStringAsync(recordId, jsonData);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine("Unable to connect to Redis", ex);
         }
-        
+
     }
 }

@@ -1,7 +1,6 @@
 ﻿using MapsterMapper;
-using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.Extensions.Caching.Distributed;
-using MiskCv_Api.Extensions.DistributedCache;
+using MiskCv_Api.Services.DistributedCacheService;
 
 namespace MiskCv_Api.Controllers;
 
@@ -11,12 +10,12 @@ public class AddressesController : ControllerBase
 {
     private readonly IAddressRepository _addressRepository;
     private readonly IMapper _mapper;
-    private readonly IDistributedCache _cache;
+    private readonly IDistributedCachingService _cache;
 
     public AddressesController(
             IAddressRepository addressRepository,
             IMapper mapper,
-            IDistributedCache cache)
+            IDistributedCachingService cache)
     {
         _addressRepository = addressRepository;
         _mapper = mapper;

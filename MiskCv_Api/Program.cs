@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using MiskCv_Api.Data;
 using MiskCv_Api.Services.AzureServices;
 using Microsoft.Extensions.Caching.Distributed;
-using MiskCv_Api.Extensions.DistributedCache;
+using MiskCv_Api.Services;
 
 namespace MiskCv_Api
 {

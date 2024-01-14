@@ -1,6 +1,5 @@
 ﻿using MapsterMapper;
-using Microsoft.Extensions.Caching.Distributed;
-using MiskCv_Api.Extensions.DistributedCache;
+using MiskCv_Api.Services.DistributedCacheService;
 
 namespace MiskCv_Api.Controllers;
 
@@ -10,12 +9,12 @@ public class SkillsController : ControllerBase
 {
     private readonly ISkillRepository _skillRepository;
     private readonly IMapper _mapper;
-    private readonly IDistributedCache _cache;
+    private readonly IDistributedCachingService _cache;
 
     public SkillsController(
             ISkillRepository skillRepository,
             IMapper mapper,
-            IDistributedCache cache)
+            IDistributedCachingService cache)
     {
         _skillRepository = skillRepository;
         _mapper = mapper;

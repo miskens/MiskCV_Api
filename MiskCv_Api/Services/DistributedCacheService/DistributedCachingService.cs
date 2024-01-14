@@ -1,30 +1,31 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace MiskCv_Api.Extensions.DistributedCache;
+namespace MiskCv_Api.Services.DistributedCacheService;
 
-public static class DistributedCacheExtension
+public class DistributedCachingService : IDistributedCachingService
 {
-    private static IConfiguration? _config { get; set; }
+    private IConfiguration? _config;
+    private IDistributedCache? _cache;
 
-    public static void SetConfiguration(IConfiguration config)
+    public DistributedCachingService(IConfiguration config, IDistributedCache cache)
     {
         _config = config;
+        _cache = cache;
     }
 
-    public static async Task<T> GetRecordAsync<T>(this IDistributedCache cache, string recordId)
+    public async Task<T> GetRecordAsync<T>(string recordId)
     {
-        if (cache == null) throw new ArgumentNullException(nameof(cache));
+        if (_cache == null) throw new ArgumentNullException(nameof(_cache));
 
-        var jsonData = await cache.GetStringAsync(recordId);
+        var jsonData = await _cache.GetStringAsync(recordId);
 
         if (jsonData == null) return default!;
 
         return JsonSerializer.Deserialize<T>(jsonData)!;
     }
 
-    public static async Task SetRecordAsync<T>(
-                                this IDistributedCache cache,
+    public async Task SetRecordAsync<T>(
                                 string recordId,
                                 T data,
                                 TimeSpan? absoluteExpireTime = null,
@@ -39,6 +40,8 @@ public static class DistributedCacheExtension
         options.SlidingExpiration = unusedExpireTime ?? TimeSpan.FromSeconds(slidingExpireTimeDefault);
 
         var jsonData = JsonSerializer.Serialize(data);
-        await cache.SetStringAsync(recordId, jsonData, options);
+
+        if (_cache != null)
+            await _cache.SetStringAsync(recordId, jsonData, options);
     }
 }

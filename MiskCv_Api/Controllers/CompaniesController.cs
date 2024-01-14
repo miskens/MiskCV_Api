@@ -1,8 +1,6 @@
 ﻿using MapsterMapper;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Graph.Drives.Item.Items.Item.Workbook.Functions.Ceiling_Math;
-using MiskCv_Api.Extensions.DistributedCache;
+using MiskCv_Api.Services.DistributedCacheService;
 
 namespace MiskCv_Api.Controllers;
 
@@ -12,12 +10,12 @@ public class CompaniesController : ControllerBase
 {
     private readonly ICompanyRepository _companiesRepository;
     private readonly IMapper _mapper;
-    private readonly IDistributedCache _cache;
+    private readonly IDistributedCachingService _cache;
 
     public CompaniesController(
             ICompanyRepository companiesRepository,
             IMapper mapper,
-            IDistributedCache cache)
+            IDistributedCachingService cache)
     {
         _companiesRepository = companiesRepository;
         _mapper = mapper;
