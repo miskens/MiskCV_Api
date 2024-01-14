@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -6,15 +7,18 @@ namespace MiskCv_Api.Services;
 
 public class JwtService : IJwtService
 {
+    private IDistributedCachingService _cache;
     private readonly string _secretKey;
     private readonly string _issuer;
     private readonly string _audience;
+    private readonly string _revokedTokensKey = "revoked_tokens";
 
-    public JwtService(string secretKey, string issuer, string audience)
+    public JwtService(IDistributedCachingService cache, IConfiguration config)
     {
-        _secretKey = secretKey;
-        _issuer = issuer;
-        _audience = audience;
+        _cache = cache;
+        _secretKey = config["Jwt:Key"]!;
+        _issuer = config["Jwt:Issuer"]!;
+        _audience = config["Jwt:Audience"]!;
     }
 
     public string GenerateToken(string userId, string username, string role = "USER", int expirationMinutes = 1) //TODO: Change to 30 min
@@ -39,5 +43,27 @@ public class JwtService : IJwtService
 
         var tokenHandler = new JwtSecurityTokenHandler();
         return tokenHandler.WriteToken(token);
+    }
+
+    public async Task<bool> IsTokenRevoked(string token)
+    {
+        var revokedTokens = await _cache.GetRecordAsync<string>(_revokedTokensKey);
+
+        var tokenList = JsonConvert.DeserializeObject<List<string>>(revokedTokens) ?? new List<string>();
+
+        return tokenList.Contains(token);
+    }
+
+    public async Task RevokeToken(string userId, string token)
+    {
+        var revokedTokens = await _cache.GetRecordAsync<string>(_revokedTokensKey);
+
+        var tokenList = new List<string>();
+        if(revokedTokens != null)
+            tokenList = JsonConvert.DeserializeObject<List<string>>(revokedTokens);
+
+        tokenList!.Add(token);
+
+        await _cache.SetRecordAsync<string>(_revokedTokensKey, JsonConvert.SerializeObject(tokenList));
     }
 }

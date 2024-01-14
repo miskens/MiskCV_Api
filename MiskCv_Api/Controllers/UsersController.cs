@@ -1,8 +1,4 @@
-﻿using MapsterMapper;
-using Microsoft.Extensions.Caching.Distributed;
-using MiskCv_Api.Extensions.DistributedCache;
-
-namespace MiskCv_Api.Controllers;
+﻿namespace MiskCv_Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -10,12 +6,12 @@ public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
-    private readonly IDistributedCache _cache;
+    private readonly IDistributedCachingService _cache;
 
     public UsersController(
             IUserRepository userRepository,
             IMapper mapper,
-            IDistributedCache cache)
+            IDistributedCachingService cache)
     {
         _userRepository = userRepository;
         _mapper = mapper;

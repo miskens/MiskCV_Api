@@ -1,15 +1,9 @@
-﻿using System.Reflection;
-using MapsterMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
-using Microsoft.IdentityModel.Tokens;
 using MiskCv_Api.Mapping;
-using MiskCv_Api.Services.Repositories.IdentityUserRepository;
-using MiskCv_Api.Services.AzureServices;
-using MiskCv_Api.Extensions.DistributedCache;
 using MiskCv_Api.Services;
+using MiskCv_Api.Services.AzureServices;
+using MiskCv_Api.Services.DistributedCacheService;
 
 namespace MiskCv_Api
 {
@@ -21,14 +15,14 @@ namespace MiskCv_Api
 
             services.AddDbContext<MiskIdentityDbContext>(options => options.UseSqlServer(connectionString));
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<MiskIdentityDbContext>();
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<MiskIdentityDbContext>();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
+            services.AddAuthentication(options => options.DefaultScheme = IdentityConstants.ApplicationScheme)
+            .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
 
-            //services.AddMvc();
             services.AddControllers();
-
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
@@ -47,19 +41,13 @@ namespace MiskCv_Api
             });
 
             services.AddSingleton<IAzureAuthenticationService, AzureAuthenticationService>();
-            services.AddSingleton<IJwtService>(new JwtService(
-                                                configuration["Jwt:Key"]!,
-                                                configuration["Jwt:Issuer"]!,
-                                                configuration["Jwt:Audience"]!));
-            services.AddScoped<IUserManager, UserManager>();
+            services.AddSingleton<IDistributedCachingService, DistributedCachingService>();
+            services.AddSingleton<IJwtService, JwtService>();
 
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IAddressRepository, AddressRepository>();
             services.AddTransient<ICompanyRepository, CompanyRepository>();
             services.AddTransient<ISkillRepository, SkillRepository>();
-
-            // Static class
-            DistributedCacheExtension.SetConfiguration(configuration);
 
             return services;
         }
