@@ -1,15 +1,8 @@
-﻿using System.Reflection;
-using MapsterMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
-using Microsoft.IdentityModel.Tokens;
 using MiskCv_Api.Mapping;
-using MiskCv_Api.Services.Repositories.IdentityUserRepository;
-using MiskCv_Api.Services.AzureServices;
 using MiskCv_Api.Services;
-using Microsoft.Extensions.Caching.Distributed;
+using MiskCv_Api.Services.AzureServices;
 using MiskCv_Api.Services.DistributedCacheService;
 
 namespace MiskCv_Api

@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using MiskCv_Api.Dtos.Identity;
 using MiskCv_Api.Services;
 using MiskCv_Api.Services.DistributedCacheService;
+using StackExchange.Redis;
 
 namespace MiskCv_Api.Controllers.Identity;
 
@@ -51,6 +52,7 @@ public class IdentityUserController: ControllerBase
         };
 
         var result = await _userManager.CreateAsync(user)!;
+        await _userManager.AddToRoleAsync(user, "USER");
 
         if(result == null)
         {
