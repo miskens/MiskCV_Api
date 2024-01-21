@@ -122,7 +122,7 @@ public class IdentityUserController: ControllerBase
 
         foreach (var role in await _userManager.GetRolesAsync(user))
         {
-            roles.Add(role);    
+            roles.Add(role);
         }
 
         var token = _jwtservice.GenerateToken(user, roles);
@@ -145,22 +145,18 @@ public class IdentityUserController: ControllerBase
     [Route("logout")]
     public async Task<IActionResult> Logout()
     {
-        var user = await _userManager.FindByNameAsync(User!.Identity!.Name!);
-        
-        if(user != null)
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var token = await _cache.GetRecordAsync<string>($"Jwt_User_{userId}");
+
+        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+
+        if (userId != null)
         {
-            var token = await _cache.GetRecordAsync<string>($"Jwt_User_{user.Id}");
-
-            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
-
-            await _jwtservice.RevokeToken(user.Id, token);
-
-            HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
-
-            return Ok(new { message = "Logout successful" });
+            await _jwtservice.RevokeToken(userId, token);
         }
 
-        return BadRequest($"Logout failed for user: {User.Identity.Name}");
+        return Ok(new { message = "Logout successful" });
     }
 
     #endregion
