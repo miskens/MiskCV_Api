@@ -145,18 +145,25 @@ public class IdentityUserController: ControllerBase
     [Route("logout")]
     public async Task<IActionResult> Logout()
     {
+        if (User == null) 
+        { 
+            return BadRequest("User is not logged in."); 
+        }
+
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        var token = await _cache.GetRecordAsync<string>($"Jwt_User_{userId}");
-
-        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
         if (userId != null)
         {
+            var token = await _cache.GetRecordAsync<string>($"Jwt_User_{userId}");
+
+            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+
             await _jwtservice.RevokeToken(userId, token);
+
+            return Ok(new { message = "Logout successful" });
         }
 
-        return Ok(new { message = "Logout successful" });
+        return Problem("Log out failed.");
     }
 
     #endregion
