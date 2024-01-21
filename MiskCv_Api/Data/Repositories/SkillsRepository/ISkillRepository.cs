@@ -1,4 +1,4 @@
-﻿namespace MiskCv_Api.Services.Repositories.SkillsRepository;
+﻿namespace MiskCv_Api.Data.Repositories.SkillsRepository;
 
 public interface ISkillRepository
 {

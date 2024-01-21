@@ -22,6 +22,7 @@ public class CompaniesController : ControllerBase
 
     // GET: api/Companies
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompany()
     {
         IEnumerable<Company>? companyModels = null;
@@ -53,6 +54,7 @@ public class CompaniesController : ControllerBase
 
     // GET: api/Companies/5
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<CompanyDto>> GetCompany(int id)
     {
         Company? companyModel = null;
@@ -88,6 +90,7 @@ public class CompaniesController : ControllerBase
     // PUT: api/Companies/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutCompany([FromBody] CompanyUpdateDto companyDto, int id)
     {
         var company = _mapper.Map<Company>(companyDto);
@@ -118,6 +121,7 @@ public class CompaniesController : ControllerBase
     // POST: api/Companies
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Company>?> PostCompany([FromBody] CompanyCreateDto companyDto)
     {
         var companyModel = _mapper.Map<Company>(companyDto);
@@ -153,6 +157,7 @@ public class CompaniesController : ControllerBase
 
     // DELETE: api/Companies/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteCompany(int id)
     {
         var result = await _companiesRepository.DeleteCompany(id);

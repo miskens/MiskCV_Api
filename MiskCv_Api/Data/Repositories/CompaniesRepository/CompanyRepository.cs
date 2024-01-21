@@ -1,6 +1,6 @@
 ﻿using MiskCv_Api.Models;
 
-namespace MiskCv_Api.Services.Repositories.CompaniesRepository;
+namespace MiskCv_Api.Data.Repositories.CompaniesRepository;
 
 public class CompanyRepository : ICompanyRepository
 {
@@ -125,5 +125,5 @@ public class CompanyRepository : ICompanyRepository
 
     #endregion
 
-    
+
 }
