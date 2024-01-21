@@ -21,6 +21,7 @@ public class AddressesController : ControllerBase
     #region GET
 
     // GET: api/Addresses
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AddressDto>>> GetAddress()
     {
@@ -53,6 +54,7 @@ public class AddressesController : ControllerBase
 
     // GET: api/Addresses/5
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<AddressDto>> GetAddress(int id)
     {
         Address? addressModel = null;
@@ -88,6 +90,7 @@ public class AddressesController : ControllerBase
     // PUT: api/Addresses/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutAddress([FromBody] AddressUpdateDto addressDto, int id)
     {
         var addressModel = _mapper.Map<Address>(addressDto);
@@ -118,6 +121,7 @@ public class AddressesController : ControllerBase
     // POST: api/Addresses
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Address>> PostAddress([FromBody] AddressCreateDto addressDto)
     {
         var addressModel = _mapper.Map<Address>(addressDto);
@@ -151,6 +155,7 @@ public class AddressesController : ControllerBase
 
     // DELETE: api/Addresses/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteAddress(int id)
     {
         var result = await _addressRepository.DeleteAddress(id);

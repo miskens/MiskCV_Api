@@ -62,11 +62,49 @@ public class IdentityUserController: ControllerBase
         }
     }
 
+    [HttpPost("adminregister")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RegisterWithRole([FromBody] RegisterAdminDto registerAdminDto)
+    {
+        var use = User.Identity;
+        if ((registerAdminDto.Password != registerAdminDto.ConfirmPassword || registerAdminDto.Email.IsNullOrEmpty()))
+        {
+            return Problem("Email is empty or does not match confirm Email");
+        }
+
+        string hashedPassword = HashPassword(registerAdminDto.Password);
+
+        var user = new IdentityUser
+        {
+            UserName = registerAdminDto.UserName,
+            Email = registerAdminDto.Email,
+            PasswordHash = hashedPassword
+        };
+
+        var result = await _userManager.CreateAsync(user)!;
+        await _userManager.AddToRoleAsync(user, registerAdminDto.Role);
+
+        if (result == null)
+        {
+            return BadRequest("Failed to register User");
+        }
+
+        if (result.Succeeded)
+        {
+            return Ok("User registered successfully");
+        }
+        else
+        {
+            return BadRequest(result.Errors);
+        }
+    }
+
     #endregion
 
     #region Login
 
     [HttpPost("Login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
         var user = await _userManager.FindByNameAsync(loginDto.UserName);
@@ -79,33 +117,20 @@ public class IdentityUserController: ControllerBase
         {
             return Unauthorized("Incorrect password");
         }
+            
+        var roles = new List<string>();
 
-        if (user.UserName != null)
+        foreach (var role in await _userManager.GetRolesAsync(user))
         {
-            var token = _jwtservice.GenerateToken(user.Id, user.UserName);
+            roles.Add(role);    
+        }
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Email, user.Email ?? "")
-            };
+        var token = _jwtservice.GenerateToken(user, roles);
 
-            foreach (var role in await _userManager.GetRolesAsync(user))
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var claimsIdentity = new ClaimsIdentity(claims, "login");
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-            await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, claimsPrincipal);
-
-            if (token != null)
-            {
-                await _cache.SetRecordAsync<string>($"Jwt_User_{user.Id}", token);
-                return Ok(token);
-            } 
+        if (token != null)
+        {
+            await _cache.SetRecordAsync<string>($"Jwt_User_{user.Id}", token);
+            return Ok(new { Token = token });
         }
 
         return Problem("Unable to login user.");
@@ -116,6 +141,7 @@ public class IdentityUserController: ControllerBase
     #region Logout
 
     [HttpPost]
+    [Authorize]
     [Route("logout")]
     public async Task<IActionResult> Logout()
     {

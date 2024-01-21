@@ -22,6 +22,7 @@ public class UsersController : ControllerBase
 
     // GET: api/Users
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUser()
     {
         IEnumerable<User>? userModels = null;
@@ -53,6 +54,7 @@ public class UsersController : ControllerBase
 
     // GET: api/Users/5
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<UserDto>> GetUser(int id)
     {
         User? userModel = null;
@@ -88,6 +90,7 @@ public class UsersController : ControllerBase
     // PUT: api/Users/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutUser([FromBody] UserUpdateDto userDto, int id)
     {
         var userModel = _mapper.Map<User>(userDto);
@@ -117,6 +120,7 @@ public class UsersController : ControllerBase
     // POST: api/Users
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserCreatedDto>?> PostUser([FromBody] UserCreateDto userDto)
     {
         var userModel = _mapper.Map<User>(userDto);
@@ -146,6 +150,7 @@ public class UsersController : ControllerBase
 
     // DELETE: api/Users/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(int id)
     {
         var result = await _userRepository.DeleteUser(id);

@@ -1,9 +1,10 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace MiskCv_Api.Services;
+namespace MiskCv_Api.Services.JwtService;
 
 public class JwtService : IJwtService
 {
@@ -21,22 +22,28 @@ public class JwtService : IJwtService
         _audience = config["Jwt:Audience"]!;
     }
 
-    public string GenerateToken(string userId, string username, string role = "USER", int expirationMinutes = 1) //TODO: Change to 30 min
+    public string GenerateToken(IdentityUser user, List<string> roles, int expirationMinutes = 5) //TODO: Change to 30 min
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, role)
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(ClaimTypes.Email, user.Email!)
         };
 
+        foreach (var role in roles)
+        {
+            var claim = new Claim(ClaimTypes.Role, role);
+            claims.Add(claim);
+        }
+
         var token = new JwtSecurityToken(
-            _issuer,
-            _audience,
-            claims,
+            issuer: _issuer,
+            audience: _audience,
+            claims: claims,
             expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
             signingCredentials: credentials
         );
@@ -59,11 +66,11 @@ public class JwtService : IJwtService
         var revokedTokens = await _cache.GetRecordAsync<string>(_revokedTokensKey);
 
         var tokenList = new List<string>();
-        if(revokedTokens != null)
+        if (revokedTokens != null)
             tokenList = JsonConvert.DeserializeObject<List<string>>(revokedTokens);
 
         tokenList!.Add(token);
 
-        await _cache.SetRecordAsync<string>(_revokedTokensKey, JsonConvert.SerializeObject(tokenList));
+        await _cache.SetRecordAsync(_revokedTokensKey, JsonConvert.SerializeObject(tokenList));
     }
 }

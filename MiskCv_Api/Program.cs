@@ -1,15 +1,4 @@
-using MapsterMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
-using MiskCv_Api.Mapping;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using MiskCv_Api.Data;
-using MiskCv_Api.Services.AzureServices;
-using Microsoft.Extensions.Caching.Distributed;
-using MiskCv_Api.Services;
 
 namespace MiskCv_Api
 {
@@ -19,12 +8,10 @@ namespace MiskCv_Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Top level DI
             builder.Services.AddMiskCVServices(builder.Configuration);
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -33,14 +20,25 @@ namespace MiskCv_Api
 
             app.UseHttpsRedirection();
 
+            app.Use(async (context, next) =>
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                await next.Invoke();
+                logger.LogInformation($"Request finished with status code: {context.Response.StatusCode}");
+            });
+
             app.UseAuthentication();
 
             app.UseAuthorization();
 
-            Task SaveAccessTokenTask = AppAccessTokenHandler.AddAppAccessTokenAsync(app);
-            SaveAccessTokenTask.Wait();
-
             app.MapControllers();
+
+            //TODO: uncomment and change url when client is done
+            //app.UseCors(
+            //    options => options.WithOrigins("http://MiskCV...").AllowAnyMethod()
+            //);
+
+            SeedRolesAndAdmin.Seed(app, builder);
 
             app.Run();
         }

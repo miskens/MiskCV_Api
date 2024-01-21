@@ -1,4 +1,4 @@
-﻿namespace MiskCv_Api.Services.Repositories.UsersRepository;
+﻿namespace MiskCv_Api.Data.Repositories.UsersRepository;
 
 public interface IUserRepository
 {

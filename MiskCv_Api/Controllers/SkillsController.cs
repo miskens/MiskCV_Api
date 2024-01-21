@@ -22,6 +22,7 @@ public class SkillsController : ControllerBase
 
     // GET: api/Skills
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<SkillDto>>> GetSkill()
     {
         IEnumerable<Skill>? skillModels = null;
@@ -53,6 +54,7 @@ public class SkillsController : ControllerBase
 
     // GET: api/Skills/5
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<ActionResult<SkillDto>> GetSkill(int id)
     {
         Skill? skillModel = null;
@@ -88,6 +90,7 @@ public class SkillsController : ControllerBase
     // PUT: api/Skills/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutSkill([FromBody] SkillUpdateDto skillDto, int id)
     {
         var skill = _mapper.Map<Skill>(skillDto);
@@ -117,6 +120,7 @@ public class SkillsController : ControllerBase
     // POST: api/Skills
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<SkillCreatedDto>> PostSkill([FromBody] SkillCreateDto skillDto)
     {
         var skillModel = _mapper.Map<Skill>(skillDto);
@@ -149,6 +153,7 @@ public class SkillsController : ControllerBase
 
     // DELETE: api/Skills/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteSkill(int id)
     {
         var result = await _skillRepository.DeleteSkill(id);

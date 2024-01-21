@@ -1,4 +1,4 @@
-﻿namespace MiskCv_Api.Services.Repositories.AddressesRepository;
+﻿namespace MiskCv_Api.Data.Repositories.AddressesRepository;
 
 public interface IAddressRepository
 {

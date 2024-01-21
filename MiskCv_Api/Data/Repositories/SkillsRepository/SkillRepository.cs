@@ -1,4 +1,4 @@
-﻿namespace MiskCv_Api.Services.Repositories.SkillsRepository;
+﻿namespace MiskCv_Api.Data.Repositories.SkillsRepository;
 
 public class SkillRepository : ISkillRepository
 {
@@ -62,7 +62,7 @@ public class SkillRepository : ISkillRepository
         {
             await _context.SaveChangesAsync();
         }
-        catch( DbUpdateConcurrencyException)
+        catch (DbUpdateConcurrencyException)
         {
             if (!EntityExists(id))
             {
@@ -85,12 +85,12 @@ public class SkillRepository : ISkillRepository
     {
         if (_context.Skill == null || _context.Company == null) { return null; }
 
-        if(companyId > 0)
+        if (companyId > 0)
         {
             var company = await _context.Company.FindAsync(companyId);
-            
+
             if (company != null)
-            skill.Company.Add(company);
+                skill.Company.Add(company);
         }
 
         _context.Skill.Add(skill);

@@ -51,8 +51,4 @@
     <None Include="E:\Projects\Visual Studio Projects\MiskCv\Rest-Api\MiskCv_Api\.editorconfig" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>

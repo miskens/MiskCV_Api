@@ -1,4 +1,4 @@
-﻿namespace MiskCv_Api.Services.Repositories.UsersRepository;
+﻿namespace MiskCv_Api.Data.Repositories.UsersRepository;
 
 public class UserRepository : IUserRepository
 {
@@ -26,8 +26,8 @@ public class UserRepository : IUserRepository
         }
 
         return users;
-    }  
-    
+    }
+
     public async Task<User?> GetUser(int id)
     {
         if (_context.User == null)
@@ -98,7 +98,7 @@ public class UserRepository : IUserRepository
 
         var user = await _context.User.FindAsync(id);
 
-        if(user == null) { return false; }
+        if (user == null) { return false; }
 
         _context.User.Remove(user);
         await _context.SaveChangesAsync();

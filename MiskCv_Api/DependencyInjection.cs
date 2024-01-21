@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Net;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
-using MiskCv_Api.Mapping;
-using MiskCv_Api.Services;
-using MiskCv_Api.Services.AzureServices;
-using MiskCv_Api.Services.DistributedCacheService;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MiskCv_Api
 {
@@ -13,18 +12,67 @@ namespace MiskCv_Api
         {
             var connectionString = configuration.GetConnectionString("IdentityConnString") ?? throw new InvalidOperationException("Connection string 'IdentityConnString' not found.");
 
-            services.AddDbContext<MiskIdentityDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<MiskIdentityDbContext>(options => options.UseSqlServer(connectionString));           
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<MiskIdentityDbContext>();
+            services.AddDefaultIdentity<IdentityUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+                options.SignIn.RequireConfirmedEmail = false;
 
-            services.AddAuthentication(options => options.DefaultScheme = IdentityConstants.ApplicationScheme)
-            .AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"));
+                options.Password.RequireDigit = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 4;
+                options.Password.RequireUppercase = false;
+
+                options.User.RequireUniqueEmail = false;
+            })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<MiskIdentityDbContext>();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        RoleClaimType = ClaimConstants.Role,
+                        ValidIssuer = configuration["Jwt:Issuer"],
+                        ValidAudience = configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
+                        
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnForbidden = ctx =>
+                        {
+                            ctx.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
+            //TODO: uncomment when client is done
+            //services.AddCors();
+
+            services.AddAuthorization();
 
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+
+            services.AddLogging(logging =>
+            {
+                logging.AddDebug();
+                logging.AddConsole();
+                logging.AddEventSourceLogger();
+            });
 
             // DI from Mapping folder
             services.AddMappings();
@@ -40,7 +88,6 @@ namespace MiskCv_Api
                 options.UseSqlServer(configuration.GetConnectionString("MiskCvDbTEMPConnString"));
             });
 
-            services.AddSingleton<IAzureAuthenticationService, AzureAuthenticationService>();
             services.AddSingleton<IDistributedCachingService, DistributedCachingService>();
             services.AddSingleton<IJwtService, JwtService>();
 
