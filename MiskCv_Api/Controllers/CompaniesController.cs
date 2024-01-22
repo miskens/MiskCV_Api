@@ -23,22 +23,22 @@ public class CompaniesController : ControllerBase
     // GET: api/Companies
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompany()
+    public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompany(CancellationToken cancellationToken)
     {
         IEnumerable<Company>? companyModels = null;
 
         var actionName = $"{nameof(GetCompany)}";
         var recordKey = $"{ actionName }_AllCompanies";
 
-        companyModels = await _cache.GetRecordAsync<IEnumerable<Company>>(recordKey);
+        companyModels = await _cache.GetRecordAsync<IEnumerable<Company>>(recordKey, cancellationToken);
 
         if (companyModels == null )
         {
-            companyModels = await _companiesRepository.GetCompanies();
+            companyModels = await _companiesRepository.GetCompanies(cancellationToken);
 
             if (companyModels != null )
             {
-                await _cache.SetRecordAsync<IEnumerable<Company>>(recordKey, companyModels);
+                await _cache.SetRecordAsync<IEnumerable<Company>>(recordKey, companyModels, cancellationToken);
             }
         }
 
@@ -55,21 +55,21 @@ public class CompaniesController : ControllerBase
     // GET: api/Companies/5
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<CompanyDto>> GetCompany(int id)
+    public async Task<ActionResult<CompanyDto>> GetCompany(int id, CancellationToken cancellationToken)
     {
         Company? companyModel = null;
 
         var recordKey = $"Company_Id_{id}";
 
-        companyModel = await _cache.GetRecordAsync<Company>(recordKey);
+        companyModel = await _cache.GetRecordAsync<Company>(recordKey, cancellationToken);
 
         if (companyModel == null)
         {
-            companyModel = await _companiesRepository.GetCompany(id);
+            companyModel = await _companiesRepository.GetCompany(id, cancellationToken);
 
             if (companyModel != null)
             {
-                await _cache.SetRecordAsync<Company>(recordKey, companyModel);
+                await _cache.SetRecordAsync<Company>(recordKey, companyModel, cancellationToken);
             }
         }
 
@@ -91,7 +91,7 @@ public class CompaniesController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> PutCompany([FromBody] CompanyUpdateDto companyDto, int id)
+    public async Task<IActionResult> PutCompany([FromBody] CompanyUpdateDto companyDto, int id, CancellationToken cancellationToken)
     {
         var company = _mapper.Map<Company>(companyDto);
 
@@ -100,7 +100,7 @@ public class CompaniesController : ControllerBase
             return BadRequest();
         }
 
-        var result = await _companiesRepository.UpdateCompany(id, company);
+        var result = await _companiesRepository.UpdateCompany(id, company,cancellationToken);
 
         if (result == null)
         {
@@ -109,7 +109,7 @@ public class CompaniesController : ControllerBase
 
         var recordKey = $"Company_Id_{result.Id}";
 
-        await _cache.SetRecordAsync<Company>(recordKey, result);
+        await _cache.SetRecordAsync<Company>(recordKey, result, cancellationToken);
 
         return NoContent();
     }
@@ -122,11 +122,11 @@ public class CompaniesController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<Company>?> PostCompany([FromBody] CompanyCreateDto companyDto)
+    public async Task<ActionResult<Company>?> PostCompany([FromBody] CompanyCreateDto companyDto, CancellationToken cancellationToken)
     {
         var companyModel = _mapper.Map<Company>(companyDto);
 
-        companyModel = await _companiesRepository.CreateCompany(companyModel, companyDto.SkillId);
+        companyModel = await _companiesRepository.CreateCompany(companyModel, companyDto.SkillId, cancellationToken);
 
         if (companyModel == null) 
         { 
@@ -137,7 +137,7 @@ public class CompaniesController : ControllerBase
         {
             var createdCompany = _mapper.Map<CompanyCreatedDto>(companyModel);
             var recordKey = $"Company_Id_{companyModel.Id}";
-            await _cache.SetRecordAsync<Company>(recordKey, companyModel);
+            await _cache.SetRecordAsync<Company>(recordKey, companyModel, cancellationToken);
 
             return CreatedAtAction("GetCompany", new { id = createdCompany.Id }, createdCompany);
         }
@@ -158,9 +158,9 @@ public class CompaniesController : ControllerBase
     // DELETE: api/Companies/5
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteCompany(int id)
+    public async Task<IActionResult> DeleteCompany(int id, CancellationToken cancellationToken)
     {
-        var result = await _companiesRepository.DeleteCompany(id);
+        var result = await _companiesRepository.DeleteCompany(id, cancellationToken);
 
         if (result == false) { return NotFound(); }
 

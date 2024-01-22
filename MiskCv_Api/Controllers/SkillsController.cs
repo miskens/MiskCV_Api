@@ -23,22 +23,22 @@ public class SkillsController : ControllerBase
     // GET: api/Skills
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<SkillDto>>> GetSkill()
+    public async Task<ActionResult<IEnumerable<SkillDto>>> GetSkill(CancellationToken cancellationToken)
     {
         IEnumerable<Skill>? skillModels = null;
 
         var actionName = $"{nameof(GetSkill)}";
         var recordKey = $"{actionName}_AllSkills";
 
-        skillModels = await _cache.GetRecordAsync<IEnumerable<Skill>>(recordKey);
+        skillModels = await _cache.GetRecordAsync<IEnumerable<Skill>>(recordKey, cancellationToken);
 
         if(skillModels == null )
         {
-            skillModels = await _skillRepository.GetSkills();
+            skillModels = await _skillRepository.GetSkills(cancellationToken);
 
             if (skillModels != null)
             {
-                await _cache.SetRecordAsync(recordKey, skillModels);
+                await _cache.SetRecordAsync(recordKey, skillModels, cancellationToken);
             }
         }
 
@@ -55,21 +55,21 @@ public class SkillsController : ControllerBase
     // GET: api/Skills/5
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<SkillDto>> GetSkill(int id)
+    public async Task<ActionResult<SkillDto>> GetSkill(int id, CancellationToken cancellationToken)
     {
         Skill? skillModel = null;
 
         var recordKey = $"Skill_Id_{id}";
 
-        skillModel = await _cache.GetRecordAsync<Skill>(recordKey);
+        skillModel = await _cache.GetRecordAsync<Skill>(recordKey, cancellationToken);
 
         if (skillModel == null )
         {
-            skillModel = await _skillRepository.GetSkill(id);
+            skillModel = await _skillRepository.GetSkill(id, cancellationToken);
 
             if (skillModel != null)
             {
-                await _cache.SetRecordAsync(recordKey, skillModel);
+                await _cache.SetRecordAsync(recordKey, skillModel, cancellationToken);
             }
         }
 
@@ -91,7 +91,7 @@ public class SkillsController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> PutSkill([FromBody] SkillUpdateDto skillDto, int id)
+    public async Task<IActionResult> PutSkill([FromBody] SkillUpdateDto skillDto, int id, CancellationToken cancellationToken)
     {
         var skill = _mapper.Map<Skill>(skillDto);
 
@@ -100,7 +100,7 @@ public class SkillsController : ControllerBase
             return BadRequest();
         }
 
-        var result = await _skillRepository.UpdateSkill(id, skill);
+        var result = await _skillRepository.UpdateSkill(id, skill, cancellationToken);
 
         if (result == null)
         {
@@ -108,7 +108,7 @@ public class SkillsController : ControllerBase
         }
 
         var recordKey = $"Skill_Id_{result.Id}";
-        await _cache.SetRecordAsync<Skill>(recordKey, skill);
+        await _cache.SetRecordAsync<Skill>(recordKey, skill, cancellationToken);
 
         return NoContent();
     }
@@ -121,11 +121,11 @@ public class SkillsController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<SkillCreatedDto>> PostSkill([FromBody] SkillCreateDto skillDto)
+    public async Task<ActionResult<SkillCreatedDto>> PostSkill([FromBody] SkillCreateDto skillDto, CancellationToken cancellationToken)
     {
         var skillModel = _mapper.Map<Skill>(skillDto);
         
-        skillModel = await _skillRepository.CreateSkill(skillModel, skillDto.companyId);
+        skillModel = await _skillRepository.CreateSkill(skillModel, skillDto.companyId, cancellationToken);
 
         if (skillModel == null) 
         { 
@@ -136,7 +136,7 @@ public class SkillsController : ControllerBase
         {
             var createdSkill = _mapper.Map<SkillCreatedDto>(skillModel);
             var recordKey = $"Skill_Id_{skillModel.Id}";
-            await _cache.SetRecordAsync<Skill>(recordKey, skillModel);
+            await _cache.SetRecordAsync<Skill>(recordKey, skillModel, cancellationToken);
 
             return CreatedAtAction("GetSkill", new { id = createdSkill.Id }, createdSkill);
         }
@@ -154,9 +154,9 @@ public class SkillsController : ControllerBase
     // DELETE: api/Skills/5
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteSkill(int id)
+    public async Task<IActionResult> DeleteSkill(int id, CancellationToken cancellationToken)
     {
-        var result = await _skillRepository.DeleteSkill(id);
+        var result = await _skillRepository.DeleteSkill(id, cancellationToken);
 
         if (result == false) { return NotFound(); }
 

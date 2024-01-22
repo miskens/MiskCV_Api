@@ -12,14 +12,14 @@ public class CompanyRepository : ICompanyRepository
     }
 
     #region GET
-    public async Task<IEnumerable<Company>?> GetCompanies()
+    public async Task<IEnumerable<Company>?> GetCompanies(CancellationToken cancellationToken)
     {
         if (_context.Company == null)
         {
             return null;
         }
 
-        var companies = await _context.Company.ToListAsync();
+        var companies = await _context.Company.ToListAsync(cancellationToken);
 
         if (companies.Count < 0 || companies == null)
         {
@@ -29,14 +29,14 @@ public class CompanyRepository : ICompanyRepository
         return companies;
     }
 
-    public async Task<Company?> GetCompany(int id)
+    public async Task<Company?> GetCompany(int id, CancellationToken cancellationToken)
     {
         if (_context.Company == null)
         {
             return null;
         }
 
-        var company = await _context.Company.FindAsync(id);
+        var company = await _context.Company.FindAsync(id, cancellationToken);
 
         if (company == null)
         {
@@ -50,7 +50,7 @@ public class CompanyRepository : ICompanyRepository
 
     #region PUT
 
-    public async Task<Company?> UpdateCompany(int id, Company company)
+    public async Task<Company?> UpdateCompany(int id, Company company, CancellationToken cancellationToken)
     {
         if (_context.Company == null) { return null; }
 
@@ -58,7 +58,7 @@ public class CompanyRepository : ICompanyRepository
 
         try
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
         catch (DBConcurrencyException)
         {
@@ -78,20 +78,20 @@ public class CompanyRepository : ICompanyRepository
 
     #region POST
 
-    public async Task<Company?> CreateCompany(Company company, int skillId)
+    public async Task<Company?> CreateCompany(Company company, int skillId, CancellationToken cancellationToken)
     {
         if (_context.Company == null) { return null; }
 
         if (skillId > 0)
         {
-            var skill = await _context.Skill.FindAsync(skillId);
+            var skill = await _context.Skill.FindAsync(skillId, cancellationToken);
 
             if (skill != null)
                 company.Skill.Add(skill);
         }
 
         _context.Company.Add(company);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return company;
     }
@@ -100,16 +100,16 @@ public class CompanyRepository : ICompanyRepository
 
     #region DELETE
 
-    public async Task<bool> DeleteCompany(int id)
+    public async Task<bool> DeleteCompany(int id, CancellationToken cancellationToken)
     {
         if (_context.Company == null) { return false; }
 
-        var company = await _context.Company.FindAsync(id);
+        var company = await _context.Company.FindAsync(id, cancellationToken);
 
         if (company == null) { return false; }
 
         _context.Company.Remove(company);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return true;
     }

@@ -11,14 +11,14 @@ public class UserRepository : IUserRepository
 
     #region GET
 
-    public async Task<IEnumerable<User>?> GetUsers()
+    public async Task<IEnumerable<User>?> GetUsers(CancellationToken cancellationToken)
     {
         if (_context.User == null)
         {
             return null;
         }
 
-        var users = await _context.User.ToListAsync();
+        var users = await _context.User.ToListAsync(cancellationToken);
 
         if (users.Count < 0 || users == null)
         {
@@ -28,14 +28,14 @@ public class UserRepository : IUserRepository
         return users;
     }
 
-    public async Task<User?> GetUser(int id)
+    public async Task<User?> GetUser(int id, CancellationToken cancellationToken)
     {
         if (_context.User == null)
         {
             return null;
         }
 
-        var user = await _context.User.FindAsync(id);
+        var user = await _context.User.FindAsync(id, cancellationToken);
 
         if (user == null)
         {
@@ -49,7 +49,7 @@ public class UserRepository : IUserRepository
 
     #region PUT
 
-    public async Task<User?> UpdateUser(int id, User user)
+    public async Task<User?> UpdateUser(int id, User user, CancellationToken cancellationToken)
     {
         if (_context.User == null) { return null; }
 
@@ -57,7 +57,7 @@ public class UserRepository : IUserRepository
 
         try
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -78,12 +78,12 @@ public class UserRepository : IUserRepository
 
     #region POST
 
-    public async Task<User?> CreateUser(User user)
+    public async Task<User?> CreateUser(User user, CancellationToken cancellationToken)
     {
         if (_context.User == null) { return null; }
 
         _context.User.Add(user);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return user;
     }
@@ -92,16 +92,16 @@ public class UserRepository : IUserRepository
 
     #region DELETE
 
-    public async Task<bool> DeleteUser(int id)
+    public async Task<bool> DeleteUser(int id, CancellationToken cancellationToken)
     {
         if (_context.User == null) { return false; }
 
-        var user = await _context.User.FindAsync(id);
+        var user = await _context.User.FindAsync(id, cancellationToken);
 
         if (user == null) { return false; }
 
         _context.User.Remove(user);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return true;
     }

@@ -11,14 +11,14 @@ public class AddressRepository : IAddressRepository
 
     #region GET
 
-    public async Task<IEnumerable<Address>?> GetAddresses()
+    public async Task<IEnumerable<Address>?> GetAddresses(CancellationToken cancellationToken)
     {
         if (_context.Address == null)
         {
             return null;
         }
 
-        var addresses = await _context.Address.ToListAsync();
+        var addresses = await _context.Address.ToListAsync(cancellationToken);
 
         if (addresses.Count < 0 || addresses == null)
         {
@@ -28,14 +28,14 @@ public class AddressRepository : IAddressRepository
         return addresses;
     }
 
-    public async Task<Address?> GetAddress(int id)
+    public async Task<Address?> GetAddress(int id, CancellationToken cancellationToken)
     {
         if (_context.Address == null)
         {
             return null;
         }
 
-        var address = await _context.Address.FindAsync(id);
+        var address = await _context.Address.FindAsync(id, cancellationToken);
 
         if (address == null)
         {
@@ -49,7 +49,7 @@ public class AddressRepository : IAddressRepository
 
     #region PUT
 
-    public async Task<Address?> UpdateAddress(int id, Address address)
+    public async Task<Address?> UpdateAddress(int id, Address address, CancellationToken cancellationToken)
     {
         if (_context.Address == null) { return null; }
 
@@ -57,7 +57,7 @@ public class AddressRepository : IAddressRepository
 
         try
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
         catch (DBConcurrencyException)
         {
@@ -78,12 +78,12 @@ public class AddressRepository : IAddressRepository
 
     #region POST
 
-    public async Task<Address?> CreateAddress(Address address)
+    public async Task<Address?> CreateAddress(Address address, CancellationToken cancellationToken)
     {
         if (_context.Address == null) { return null; }
 
         _context.Address.Add(address);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return address;
     }
@@ -92,16 +92,16 @@ public class AddressRepository : IAddressRepository
 
     #region DELETE
 
-    public async Task<bool> DeleteAddress(int id)
+    public async Task<bool> DeleteAddress(int id, CancellationToken cancellationToken)
     {
         if (_context.Address == null) { return false; }
 
-        var address = await _context.Address.FindAsync(id);
+        var address = await _context.Address.FindAsync(id, cancellationToken);
 
         if (address == null) { return false; }
 
         _context.Address.Remove(address);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return true;
     }
