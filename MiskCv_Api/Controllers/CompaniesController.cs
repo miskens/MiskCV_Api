@@ -25,31 +25,38 @@ public class CompaniesController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<CompanyDto>>> GetCompany(CancellationToken cancellationToken)
     {
-        IEnumerable<Company>? companyModels = null;
-
-        var actionName = $"{nameof(GetCompany)}";
-        var recordKey = $"{ actionName }_AllCompanies";
-
-        companyModels = await _cache.GetRecordAsync<IEnumerable<Company>>(recordKey, cancellationToken);
-
-        if (companyModels == null )
+        try
         {
-            companyModels = await _companiesRepository.GetCompanies(cancellationToken);
+            IEnumerable<Company>? companyModels = null;
 
-            if (companyModels != null )
+            var actionName = $"{nameof(GetCompany)}";
+            var recordKey = $"{actionName}_AllCompanies";
+
+            companyModels = await _cache.GetRecordAsync<IEnumerable<Company>>(recordKey, cancellationToken);
+
+            if (companyModels == null)
             {
-                await _cache.SetRecordAsync<IEnumerable<Company>>(recordKey, companyModels, cancellationToken);
+                companyModels = await _companiesRepository.GetCompanies(cancellationToken);
+
+                if (companyModels != null)
+                {
+                    await _cache.SetRecordAsync<IEnumerable<Company>>(recordKey, companyModels, cancellationToken);
+                }
             }
-        }
 
-        if (companyModels == null)
+            if (companyModels == null)
+            {
+                return NotFound();
+            }
+
+            var companies = _mapper.Map<List<CompanyDto>>(companyModels);
+
+            return Ok(companies);
+        }
+        catch (OperationCanceledException)
         {
-            return NotFound();
+            return StatusCode(499, "Request canceled");
         }
-
-        var companies = _mapper.Map<List<CompanyDto>>(companyModels);
-
-        return Ok(companies);
     }
 
     // GET: api/Companies/5
@@ -57,30 +64,37 @@ public class CompaniesController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<CompanyDto>> GetCompany(int id, CancellationToken cancellationToken)
     {
-        Company? companyModel = null;
-
-        var recordKey = $"Company_Id_{id}";
-
-        companyModel = await _cache.GetRecordAsync<Company>(recordKey, cancellationToken);
-
-        if (companyModel == null)
+        try
         {
-            companyModel = await _companiesRepository.GetCompany(id, cancellationToken);
+            Company? companyModel = null;
 
-            if (companyModel != null)
+            var recordKey = $"Company_Id_{id}";
+
+            companyModel = await _cache.GetRecordAsync<Company>(recordKey, cancellationToken);
+
+            if (companyModel == null)
             {
-                await _cache.SetRecordAsync<Company>(recordKey, companyModel, cancellationToken);
+                companyModel = await _companiesRepository.GetCompany(id, cancellationToken);
+
+                if (companyModel != null)
+                {
+                    await _cache.SetRecordAsync<Company>(recordKey, companyModel, cancellationToken);
+                }
             }
-        }
 
-        if (companyModel == null)
+            if (companyModel == null)
+            {
+                return NotFound();
+            }
+
+            var company = _mapper.Map<CompanyDto>(companyModel);
+
+            return company;
+        }
+        catch (OperationCanceledException)
         {
-            return NotFound();
+            return StatusCode(499, "Request canceled");
         }
-
-        var company = _mapper.Map<CompanyDto>(companyModel);
-
-        return company;
     }
 
     #endregion
@@ -93,25 +107,32 @@ public class CompaniesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutCompany([FromBody] CompanyUpdateDto companyDto, int id, CancellationToken cancellationToken)
     {
-        var company = _mapper.Map<Company>(companyDto);
-
-        if (id != company.Id)
+        try
         {
-            return BadRequest();
+            var company = _mapper.Map<Company>(companyDto);
+
+            if (id != company.Id)
+            {
+                return BadRequest();
+            }
+
+            var result = await _companiesRepository.UpdateCompany(id, company, cancellationToken);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating company");
+            }
+
+            var recordKey = $"Company_Id_{result.Id}";
+
+            await _cache.SetRecordAsync<Company>(recordKey, result, cancellationToken);
+
+            return NoContent();
         }
-
-        var result = await _companiesRepository.UpdateCompany(id, company,cancellationToken);
-
-        if (result == null)
+        catch (OperationCanceledException)
         {
-            return Problem("There was a problem updating company");
+            return StatusCode(499, "Request canceled");
         }
-
-        var recordKey = $"Company_Id_{result.Id}";
-
-        await _cache.SetRecordAsync<Company>(recordKey, result, cancellationToken);
-
-        return NoContent();
     }
 
     #endregion
@@ -124,31 +145,36 @@ public class CompaniesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Company>?> PostCompany([FromBody] CompanyCreateDto companyDto, CancellationToken cancellationToken)
     {
-        var companyModel = _mapper.Map<Company>(companyDto);
-
-        companyModel = await _companiesRepository.CreateCompany(companyModel, companyDto.SkillId, cancellationToken);
-
-        if (companyModel == null) 
-        { 
-            return Problem("There was a problem adding company"); 
-        }
-
         try
         {
-            var createdCompany = _mapper.Map<CompanyCreatedDto>(companyModel);
-            var recordKey = $"Company_Id_{companyModel.Id}";
-            await _cache.SetRecordAsync<Company>(recordKey, companyModel, cancellationToken);
+            var companyModel = _mapper.Map<Company>(companyDto);
 
-            return CreatedAtAction("GetCompany", new { id = createdCompany.Id }, createdCompany);
+            companyModel = await _companiesRepository.CreateCompany(companyModel, companyDto.SkillId, cancellationToken);
+
+            if (companyModel == null)
+            {
+                return Problem("There was a problem adding company");
+            }
+
+            try
+            {
+                var createdCompany = _mapper.Map<CompanyCreatedDto>(companyModel);
+                var recordKey = $"Company_Id_{companyModel.Id}";
+                await _cache.SetRecordAsync<Company>(recordKey, companyModel, cancellationToken);
+
+                return CreatedAtAction("GetCompany", new { id = createdCompany.Id }, createdCompany);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("There was a problem creating skill", ex.Message);
+
+                return Problem(ex.Message);
+            }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            Console.WriteLine("There was a problem creating skill", ex.Message);
-
-            return Problem(ex.Message);
+            return StatusCode(499, "Request canceled");
         }
-
-        
     }
 
     #endregion
@@ -160,11 +186,18 @@ public class CompaniesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteCompany(int id, CancellationToken cancellationToken)
     {
-        var result = await _companiesRepository.DeleteCompany(id, cancellationToken);
+        try
+        {
+            var result = await _companiesRepository.DeleteCompany(id, cancellationToken);
 
-        if (result == false) { return NotFound(); }
+            if (result == false) { return NotFound(); }
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(499, "Request canceled");
+        }
     }
 
     #endregion

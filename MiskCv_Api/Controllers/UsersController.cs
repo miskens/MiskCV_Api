@@ -25,31 +25,38 @@ public class UsersController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUser(CancellationToken cancellationToken)
     {
-        IEnumerable<User>? userModels = null;
-
-        var actionName = $"{nameof(GetUser)}";
-        string recordKey = $"{actionName}_AllUsers";
-
-        userModels = await _cache.GetRecordAsync<List<User>>(recordKey, cancellationToken);
-
-        if (userModels == null)
+        try
         {
-            userModels = await _userRepository.GetUsers(cancellationToken);
+            IEnumerable<User>? userModels = null;
 
-            if (userModels != null) 
+            var actionName = $"{nameof(GetUser)}";
+            string recordKey = $"{actionName}_AllUsers";
+
+            userModels = await _cache.GetRecordAsync<List<User>>(recordKey, cancellationToken);
+
+            if (userModels == null)
             {
-                await _cache.SetRecordAsync<IEnumerable<User>>(recordKey, userModels, cancellationToken);
+                userModels = await _userRepository.GetUsers(cancellationToken);
+
+                if (userModels != null)
+                {
+                    await _cache.SetRecordAsync<IEnumerable<User>>(recordKey, userModels, cancellationToken);
+                }
             }
-        }        
 
-        if (userModels == null)
-        {
-            return NotFound();
+            if (userModels == null)
+            {
+                return NotFound();
+            }
+
+            var users = _mapper.Map<List<UserDto>>(userModels);
+
+            return Ok(users);
         }
-
-        var users = _mapper.Map<List<UserDto>>(userModels);
-
-        return Ok(users);
+        catch (OperationCanceledException)
+        {
+            return StatusCode(499, "Request canceled.");
+        }
     }
 
     // GET: api/Users/5
@@ -57,30 +64,38 @@ public class UsersController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<UserDto>> GetUser(int id, CancellationToken cancellationToken)
     {
-        User? userModel = null;
-
-        var recordKey = $"User_Id_{ id }";
-
-        userModel = await _cache.GetRecordAsync<User>(recordKey, cancellationToken);
-
-        if(userModel == null)
+        try
         {
-            userModel = await _userRepository.GetUser(id, cancellationToken);
+            User? userModel = null;
 
-            if(userModel != null)
+            var recordKey = $"User_Id_{id}";
+
+            userModel = await _cache.GetRecordAsync<User>(recordKey, cancellationToken);
+
+            if (userModel == null)
             {
-                await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
+                userModel = await _userRepository.GetUser(id, cancellationToken);
+
+                if (userModel != null)
+                {
+                    await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
+                }
             }
-        }
 
-        if (userModel == null)
+            if (userModel == null)
+            {
+                return NotFound();
+            }
+
+            var user = _mapper.Map<UserDto>(userModel);
+
+            return user;
+
+        }
+        catch (OperationCanceledException)
         {
-            return NotFound();
+            return StatusCode(499, "Request canceled.");
         }
-
-        var user = _mapper.Map<UserDto>(userModel);
-
-        return user;
     }
 
     #endregion
@@ -93,24 +108,31 @@ public class UsersController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutUser([FromBody] UserUpdateDto userDto, int id, CancellationToken cancellationToken)
     {
-        var userModel = _mapper.Map<User>(userDto);
-        
-        if (id != userModel.Id)
+        try
         {
-            return BadRequest();
+            var userModel = _mapper.Map<User>(userDto);
+
+            if (id != userModel.Id)
+            {
+                return BadRequest();
+            }
+
+            var result = await _userRepository.UpdateUser(id, userModel, cancellationToken);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating user");
+            }
+
+            var recordKey = $"User_Id_{id}";
+            await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
+
+            return NoContent();
         }
-
-        var result = await _userRepository.UpdateUser(id, userModel, cancellationToken);
-
-        if (result == null)
+        catch (OperationCanceledException)
         {
-            return Problem("There was a problem updating user");
+            return StatusCode(499, "Request canceled.");
         }
-
-        var recordKey = $"User_Id_{id}";
-        await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
-
-        return NoContent();
     }
 
     #endregion
@@ -123,24 +145,31 @@ public class UsersController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserCreatedDto>?> PostUser([FromBody] UserCreateDto userDto, CancellationToken cancellationToken)
     {
-        var userModel = _mapper.Map<User>(userDto);
-
-        userModel = await _userRepository.CreateUser(userModel, cancellationToken);
-
-        if (userModel == null) { return null; }
-
         try
         {
-            var createdUser = _mapper.Map<UserCreatedDto>(userModel);
-            var recordKey = $"User_Id_{userModel.Id}";
-            await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
+            var userModel = _mapper.Map<User>(userDto);
 
-            return CreatedAtAction("GetUser", new { id = createdUser.Id }, createdUser);
+            userModel = await _userRepository.CreateUser(userModel, cancellationToken);
+
+            if (userModel == null) { return null; }
+
+            try
+            {
+                var createdUser = _mapper.Map<UserCreatedDto>(userModel);
+                var recordKey = $"User_Id_{userModel.Id}";
+                await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
+
+                return CreatedAtAction("GetUser", new { id = createdUser.Id }, createdUser);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("There was a problem creating user", ex.Message);
+                return Problem(ex.Message);
+            }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            Console.WriteLine("There was a problem creating user", ex.Message);
-            return Problem(ex.Message);
+            return StatusCode(499, "Request canceled.");
         }
     }
 
@@ -153,10 +182,17 @@ public class UsersController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
     {
-        var result = await _userRepository.DeleteUser(id, cancellationToken);
-        if (result == false) { return NotFound(); }
+        try
+        {
+            var result = await _userRepository.DeleteUser(id, cancellationToken);
+            if (result == false) { return NotFound(); }
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(499, "Request canceled.");
+        }
     }
 
     #endregion

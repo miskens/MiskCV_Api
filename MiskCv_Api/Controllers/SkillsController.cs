@@ -25,31 +25,38 @@ public class SkillsController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<SkillDto>>> GetSkill(CancellationToken cancellationToken)
     {
-        IEnumerable<Skill>? skillModels = null;
-
-        var actionName = $"{nameof(GetSkill)}";
-        var recordKey = $"{actionName}_AllSkills";
-
-        skillModels = await _cache.GetRecordAsync<IEnumerable<Skill>>(recordKey, cancellationToken);
-
-        if(skillModels == null )
+        try
         {
-            skillModels = await _skillRepository.GetSkills(cancellationToken);
+            IEnumerable<Skill>? skillModels = null;
 
-            if (skillModels != null)
+            var actionName = $"{nameof(GetSkill)}";
+            var recordKey = $"{actionName}_AllSkills";
+
+            skillModels = await _cache.GetRecordAsync<IEnumerable<Skill>>(recordKey, cancellationToken);
+
+            if (skillModels == null)
             {
-                await _cache.SetRecordAsync(recordKey, skillModels, cancellationToken);
+                skillModels = await _skillRepository.GetSkills(cancellationToken);
+
+                if (skillModels != null)
+                {
+                    await _cache.SetRecordAsync(recordKey, skillModels, cancellationToken);
+                }
             }
-        }
 
-        if (skillModels == null)
+            if (skillModels == null)
+            {
+                return NotFound();
+            }
+
+            var skills = _mapper.Map<List<SkillDto>>(skillModels);
+
+            return Ok(skills);
+        }
+        catch (OperationCanceledException)
         {
-            return NotFound();
+            return StatusCode(499, "Request canceled.");
         }
-
-        var skills = _mapper.Map<List<SkillDto>>(skillModels);
-
-        return Ok(skills);
     }
 
     // GET: api/Skills/5
@@ -57,30 +64,37 @@ public class SkillsController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<SkillDto>> GetSkill(int id, CancellationToken cancellationToken)
     {
-        Skill? skillModel = null;
-
-        var recordKey = $"Skill_Id_{id}";
-
-        skillModel = await _cache.GetRecordAsync<Skill>(recordKey, cancellationToken);
-
-        if (skillModel == null )
+        try
         {
-            skillModel = await _skillRepository.GetSkill(id, cancellationToken);
+            Skill? skillModel = null;
 
-            if (skillModel != null)
+            var recordKey = $"Skill_Id_{id}";
+
+            skillModel = await _cache.GetRecordAsync<Skill>(recordKey, cancellationToken);
+
+            if (skillModel == null)
             {
-                await _cache.SetRecordAsync(recordKey, skillModel, cancellationToken);
+                skillModel = await _skillRepository.GetSkill(id, cancellationToken);
+
+                if (skillModel != null)
+                {
+                    await _cache.SetRecordAsync(recordKey, skillModel, cancellationToken);
+                }
             }
-        }
 
-        if (skillModel == null)
+            if (skillModel == null)
+            {
+                return NotFound();
+            }
+
+            var skill = _mapper.Map<SkillDto>(skillModel);
+
+            return skill;
+        }
+        catch (OperationCanceledException)
         {
-            return NotFound();
+            return StatusCode(499, "Request canceled.");
         }
-
-        var skill = _mapper.Map<SkillDto>(skillModel);
-
-        return skill;
     }
 
     #endregion
@@ -93,24 +107,31 @@ public class SkillsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutSkill([FromBody] SkillUpdateDto skillDto, int id, CancellationToken cancellationToken)
     {
-        var skill = _mapper.Map<Skill>(skillDto);
-
-        if (id != skill.Id)
+        try
         {
-            return BadRequest();
+            var skill = _mapper.Map<Skill>(skillDto);
+
+            if (id != skill.Id)
+            {
+                return BadRequest();
+            }
+
+            var result = await _skillRepository.UpdateSkill(id, skill, cancellationToken);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating skill");
+            }
+
+            var recordKey = $"Skill_Id_{result.Id}";
+            await _cache.SetRecordAsync<Skill>(recordKey, skill, cancellationToken);
+
+            return NoContent();
         }
-
-        var result = await _skillRepository.UpdateSkill(id, skill, cancellationToken);
-
-        if (result == null)
+        catch (OperationCanceledException)
         {
-            return Problem("There was a problem updating skill");
+            return StatusCode(499, "Request canceled.");
         }
-
-        var recordKey = $"Skill_Id_{result.Id}";
-        await _cache.SetRecordAsync<Skill>(recordKey, skill, cancellationToken);
-
-        return NoContent();
     }
 
     #endregion
@@ -123,27 +144,34 @@ public class SkillsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<SkillCreatedDto>> PostSkill([FromBody] SkillCreateDto skillDto, CancellationToken cancellationToken)
     {
-        var skillModel = _mapper.Map<Skill>(skillDto);
-        
-        skillModel = await _skillRepository.CreateSkill(skillModel, skillDto.companyId, cancellationToken);
-
-        if (skillModel == null) 
-        { 
-            return Problem("There was a problem adding skill"); 
-        }
-        
         try
         {
-            var createdSkill = _mapper.Map<SkillCreatedDto>(skillModel);
-            var recordKey = $"Skill_Id_{skillModel.Id}";
-            await _cache.SetRecordAsync<Skill>(recordKey, skillModel, cancellationToken);
+            var skillModel = _mapper.Map<Skill>(skillDto);
 
-            return CreatedAtAction("GetSkill", new { id = createdSkill.Id }, createdSkill);
+            skillModel = await _skillRepository.CreateSkill(skillModel, skillDto.companyId, cancellationToken);
+
+            if (skillModel == null)
+            {
+                return Problem("There was a problem adding skill");
+            }
+
+            try
+            {
+                var createdSkill = _mapper.Map<SkillCreatedDto>(skillModel);
+                var recordKey = $"Skill_Id_{skillModel.Id}";
+                await _cache.SetRecordAsync<Skill>(recordKey, skillModel, cancellationToken);
+
+                return CreatedAtAction("GetSkill", new { id = createdSkill.Id }, createdSkill);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("There was a problem creating skill", ex.Message);
+                return Problem(ex.Message);
+            }
         }
-        catch(Exception ex)
+        catch (OperationCanceledException)
         {
-            Console.WriteLine("There was a problem creating skill", ex.Message);
-            return Problem(ex.Message);
+            return StatusCode(499, "Request canceled.");
         }
     }
 
@@ -156,11 +184,18 @@ public class SkillsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteSkill(int id, CancellationToken cancellationToken)
     {
-        var result = await _skillRepository.DeleteSkill(id, cancellationToken);
+        try
+        {
+            var result = await _skillRepository.DeleteSkill(id, cancellationToken);
 
-        if (result == false) { return NotFound(); }
+            if (result == false) { return NotFound(); }
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(499, "Request canceled.");
+        }
     }
 
     #endregion

@@ -65,30 +65,38 @@ public class AddressesController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<AddressDto>> GetAddress(int id, CancellationToken cancellationToken)
     {
-        Address? addressModel = null;
-
-        var recordKey = $"Address_Id_{id}";
-
-        addressModel = await _cache.GetRecordAsync<Address>(recordKey, cancellationToken);
-
-        if(addressModel == null)
+        try
         {
-            addressModel = await _addressRepository.GetAddress(id);
+            Address? addressModel = null;
 
-            if (addressModel != null)
+            var recordKey = $"Address_Id_{id}";
+
+            addressModel = await _cache.GetRecordAsync<Address>(recordKey, cancellationToken);
+
+            if(addressModel == null)
             {
-                await _cache.SetRecordAsync<Address>(recordKey, addressModel, cancellationToken);
+                addressModel = await _addressRepository.GetAddress(id, cancellationToken);
+
+                if (addressModel != null)
+                {
+                    await _cache.SetRecordAsync<Address>(recordKey, addressModel, cancellationToken);
+                }
             }
-        }
 
-        if (addressModel == null)
+            if (addressModel == null)
+            {
+                return NotFound();
+            }
+
+            var addressDto = _mapper.Map<AddressDto>(addressModel);
+
+            return addressDto;
+        }
+        catch (OperationCanceledException)
         {
-            return NotFound();
+            return StatusCode(499, "Request canceled");
         }
 
-        var addressDto = _mapper.Map<AddressDto>(addressModel);
-
-        return addressDto;
     }
 
     #endregion
@@ -101,25 +109,32 @@ public class AddressesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> PutAddress([FromBody] AddressUpdateDto addressDto, int id, CancellationToken cancellationToken)
     {
-        var addressModel = _mapper.Map<Address>(addressDto);
-
-        if (id != addressModel.Id)
+        try
         {
-            return BadRequest();
+            var addressModel = _mapper.Map<Address>(addressDto);
+
+            if (id != addressModel.Id)
+            {
+                return BadRequest();
+            }
+
+            var result = await _addressRepository.UpdateAddress(id, addressModel, cancellationToken);
+
+            if (result == null)
+            {
+                return Problem("There was a problem updating address");
+            }
+
+            var recordKey = $"Address_Id_{id}";
+
+            await _cache.SetRecordAsync<Address>(recordKey, addressModel, cancellationToken);
+
+            return NoContent();
         }
-
-        var result = await _addressRepository.UpdateAddress(id, addressModel, cancellationToken);
-
-        if (result == null)
+        catch (OperationCanceledException)
         {
-            return Problem("There was a problem updating address");
+            return StatusCode(499, "Request canceled");
         }
-
-        var recordKey = $"Address_Id_{id}";
-
-        await _cache.SetRecordAsync<Address>(recordKey, addressModel, cancellationToken);
-
-        return NoContent();
     }
 
     #endregion
@@ -132,28 +147,35 @@ public class AddressesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Address>> PostAddress([FromBody] AddressCreateDto addressDto, CancellationToken cancellationToken)
     {
-        var addressModel = _mapper.Map<Address>(addressDto);
-
-        addressModel = await _addressRepository.CreateAddress(addressModel, cancellationToken);
-
-        if (addressModel == null) 
-        { 
-            return Problem("There was a problem adding address"); 
-        }
-
         try
         {
-            var createdAddress = _mapper.Map<AddressCreatedDto>(addressModel);
-            var recordKey = $"Address_Id_{addressModel.Id}";
-            await _cache.SetRecordAsync<Address>(recordKey, addressModel, cancellationToken);
+            var addressModel = _mapper.Map<Address>(addressDto);
 
-            return CreatedAtAction("GetAddress", new { id = createdAddress.Id }, createdAddress);
+            addressModel = await _addressRepository.CreateAddress(addressModel, cancellationToken);
+
+            if (addressModel == null)
+            {
+                return Problem("There was a problem adding address");
+            }
+
+            try
+            {
+                var createdAddress = _mapper.Map<AddressCreatedDto>(addressModel);
+                var recordKey = $"Address_Id_{addressModel.Id}";
+                await _cache.SetRecordAsync<Address>(recordKey, addressModel, cancellationToken);
+
+                return CreatedAtAction("GetAddress", new { id = createdAddress.Id }, createdAddress);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("There was a problem creating skill", ex.Message);
+
+                return Problem(ex.Message);
+            }
         }
-        catch (Exception ex)
+        catch(OperationCanceledException)
         {
-            Console.WriteLine("There was a problem creating skill", ex.Message);
-
-            return Problem(ex.Message);
+            return StatusCode(499, "Request canceled");
         }
     }
 
@@ -166,11 +188,18 @@ public class AddressesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteAddress(int id, CancellationToken cancellationToken)
     {
-        var result = await _addressRepository.DeleteAddress(id, cancellationToken);
+        try
+        {
+            var result = await _addressRepository.DeleteAddress(id, cancellationToken);
 
-        if(result == false) { return NotFound(); }
+            if (result == false) { return NotFound(); }
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(499, "Request canceled");
+        }
     }
 
     #endregion
