@@ -148,7 +148,7 @@ public class SkillsController : ControllerBase
         {
             var skillModel = _mapper.Map<Skill>(skillDto);
 
-            skillModel = await _skillRepository.CreateSkill(skillModel, skillDto.companyId, cancellationToken);
+            skillModel = await _skillRepository.CreateSkill(skillModel, cancellationToken, skillDto.companyId);
 
             if (skillModel == null)
             {
