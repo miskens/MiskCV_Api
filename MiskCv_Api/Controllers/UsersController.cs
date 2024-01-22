@@ -23,22 +23,22 @@ public class UsersController : ControllerBase
     // GET: api/Users
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetUser()
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUser(CancellationToken cancellationToken)
     {
         IEnumerable<User>? userModels = null;
 
         var actionName = $"{nameof(GetUser)}";
         string recordKey = $"{actionName}_AllUsers";
 
-        userModels = await _cache.GetRecordAsync<List<User>>(recordKey);
+        userModels = await _cache.GetRecordAsync<List<User>>(recordKey, cancellationToken);
 
         if (userModels == null)
         {
-            userModels = await _userRepository.GetUsers();
+            userModels = await _userRepository.GetUsers(cancellationToken);
 
             if (userModels != null) 
             {
-                await _cache.SetRecordAsync<IEnumerable<User>>(recordKey, userModels);
+                await _cache.SetRecordAsync<IEnumerable<User>>(recordKey, userModels, cancellationToken);
             }
         }        
 
@@ -55,21 +55,21 @@ public class UsersController : ControllerBase
     // GET: api/Users/5
     [HttpGet("{id}")]
     [AllowAnonymous]
-    public async Task<ActionResult<UserDto>> GetUser(int id)
+    public async Task<ActionResult<UserDto>> GetUser(int id, CancellationToken cancellationToken)
     {
         User? userModel = null;
 
         var recordKey = $"User_Id_{ id }";
 
-        userModel = await _cache.GetRecordAsync<User>(recordKey);
+        userModel = await _cache.GetRecordAsync<User>(recordKey, cancellationToken);
 
         if(userModel == null)
         {
-            userModel = await _userRepository.GetUser(id);
+            userModel = await _userRepository.GetUser(id, cancellationToken);
 
             if(userModel != null)
             {
-                await _cache.SetRecordAsync<User>(recordKey, userModel);
+                await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
             }
         }
 
@@ -91,7 +91,7 @@ public class UsersController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> PutUser([FromBody] UserUpdateDto userDto, int id)
+    public async Task<IActionResult> PutUser([FromBody] UserUpdateDto userDto, int id, CancellationToken cancellationToken)
     {
         var userModel = _mapper.Map<User>(userDto);
         
@@ -100,7 +100,7 @@ public class UsersController : ControllerBase
             return BadRequest();
         }
 
-        var result = await _userRepository.UpdateUser(id, userModel);
+        var result = await _userRepository.UpdateUser(id, userModel, cancellationToken);
 
         if (result == null)
         {
@@ -108,7 +108,7 @@ public class UsersController : ControllerBase
         }
 
         var recordKey = $"User_Id_{id}";
-        await _cache.SetRecordAsync<User>(recordKey, userModel);
+        await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
 
         return NoContent();
     }
@@ -121,11 +121,11 @@ public class UsersController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<UserCreatedDto>?> PostUser([FromBody] UserCreateDto userDto)
+    public async Task<ActionResult<UserCreatedDto>?> PostUser([FromBody] UserCreateDto userDto, CancellationToken cancellationToken)
     {
         var userModel = _mapper.Map<User>(userDto);
 
-        userModel = await _userRepository.CreateUser(userModel);
+        userModel = await _userRepository.CreateUser(userModel, cancellationToken);
 
         if (userModel == null) { return null; }
 
@@ -133,7 +133,7 @@ public class UsersController : ControllerBase
         {
             var createdUser = _mapper.Map<UserCreatedDto>(userModel);
             var recordKey = $"User_Id_{userModel.Id}";
-            await _cache.SetRecordAsync<User>(recordKey, userModel);
+            await _cache.SetRecordAsync<User>(recordKey, userModel, cancellationToken);
 
             return CreatedAtAction("GetUser", new { id = createdUser.Id }, createdUser);
         }
@@ -151,9 +151,9 @@ public class UsersController : ControllerBase
     // DELETE: api/Users/5
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteUser(int id)
+    public async Task<IActionResult> DeleteUser(int id, CancellationToken cancellationToken)
     {
-        var result = await _userRepository.DeleteUser(id);
+        var result = await _userRepository.DeleteUser(id, cancellationToken);
         if (result == false) { return NotFound(); }
 
         return NoContent();

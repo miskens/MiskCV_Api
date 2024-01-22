@@ -11,14 +11,14 @@ public class SkillRepository : ISkillRepository
     }
 
     #region GET
-    public async Task<IEnumerable<Skill>?> GetSkills()
+    public async Task<IEnumerable<Skill>?> GetSkills(CancellationToken cancellationToken)
     {
         if (_context.Skill == null)
         {
             return null;
         }
 
-        var skills = await _context.Skill.ToListAsync();
+        var skills = await _context.Skill.ToListAsync(cancellationToken);
 
         if (skills.Count < 0 || skills == null)
         {
@@ -28,14 +28,14 @@ public class SkillRepository : ISkillRepository
         return skills;
     }
 
-    public async Task<Skill?> GetSkill(int id)
+    public async Task<Skill?> GetSkill(int id, CancellationToken cancellationToken)
     {
         if (_context.Skill == null)
         {
             return null;
         }
 
-        var skill = await _context.Skill.FindAsync(id);
+        var skill = await _context.Skill.FindAsync(id, cancellationToken);
 
         if (skill == null)
         {
@@ -49,7 +49,7 @@ public class SkillRepository : ISkillRepository
 
     #region PUT
 
-    public async Task<Skill?> UpdateSkill(int id, Skill skill)
+    public async Task<Skill?> UpdateSkill(int id, Skill skill, CancellationToken cancellationToken)
     {
         if (_context.Skill == null)
         {
@@ -60,7 +60,7 @@ public class SkillRepository : ISkillRepository
 
         try
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -81,20 +81,20 @@ public class SkillRepository : ISkillRepository
 
     #region POST
 
-    public async Task<Skill?> CreateSkill(Skill skill, int companyId = 0)
+    public async Task<Skill?> CreateSkill(Skill skill, int companyId = 0, CancellationToken cancellationToken)
     {
         if (_context.Skill == null || _context.Company == null) { return null; }
 
         if (companyId > 0)
         {
-            var company = await _context.Company.FindAsync(companyId);
+            var company = await _context.Company.FindAsync(companyId, cancellationToken);
 
             if (company != null)
                 skill.Company.Add(company);
         }
 
         _context.Skill.Add(skill);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return skill;
     }
@@ -103,15 +103,15 @@ public class SkillRepository : ISkillRepository
 
     #region DELETE
 
-    public async Task<bool> DeleteSkill(int id)
+    public async Task<bool> DeleteSkill(int id, CancellationToken cancellationToken)
     {
         if (_context.Skill == null) { return false; }
 
-        var skill = await _context.Skill.FindAsync(id);
+        var skill = await _context.Skill.FindAsync(id, cancellationToken);
         if (skill == null) { return false; };
 
         _context.Skill.Remove(skill);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return true;
     }

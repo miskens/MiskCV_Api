@@ -2,9 +2,9 @@
 
 public interface IAddressRepository
 {
-    Task<IEnumerable<Address>?> GetAddresses();
-    Task<Address?> GetAddress(int id);
-    Task<Address?> UpdateAddress(int id, Address address);
-    Task<Address?> CreateAddress(Address adress);
-    Task<bool> DeleteAddress(int id);
+    Task<IEnumerable<Address>?> GetAddresses(CancellationToken cancellationToken);
+    Task<Address?> GetAddress(int id, CancellationToken cancellationToken);
+    Task<Address?> UpdateAddress(int id, Address address, CancellationToken cancellationToken);
+    Task<Address?> CreateAddress(Address adress, CancellationToken cancellationToken);
+    Task<bool> DeleteAddress(int id, CancellationToken cancellationToken);
 }

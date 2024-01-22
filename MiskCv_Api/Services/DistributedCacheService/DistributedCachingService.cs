@@ -14,11 +14,11 @@ public class DistributedCachingService : IDistributedCachingService
         _cache = cache;
     }
 
-    public async Task<T> GetRecordAsync<T>(string recordId)
+    public async Task<T> GetRecordAsync<T>(string recordId, CancellationToken cancellationToken)
     {
         if (_cache == null) throw new ArgumentNullException(nameof(_cache));
 
-        var jsonData = await _cache.GetStringAsync(recordId);
+        var jsonData = await _cache.GetStringAsync(recordId, cancellationToken);
 
         if (jsonData == null) return default!;
 
@@ -28,6 +28,7 @@ public class DistributedCachingService : IDistributedCachingService
     public async Task SetRecordAsync<T>(
                                 string recordId,
                                 T data,
+                                CancellationToken cancellationToken,
                                 TimeSpan? absoluteExpireTime = null,
                                 TimeSpan? unusedExpireTime = null)
     {
@@ -42,6 +43,6 @@ public class DistributedCachingService : IDistributedCachingService
         var jsonData = JsonSerializer.Serialize(data);
 
         if (_cache != null)
-            await _cache.SetStringAsync(recordId, jsonData, options);
+            await _cache.SetStringAsync(recordId, jsonData, options, cancellationToken);
     }
 }
