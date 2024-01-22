@@ -37,8 +37,8 @@ public class DistributedCachingService : IDistributedCachingService
 
         var options = new DistributedCacheEntryOptions();
 
-        options.AbsoluteExpirationRelativeToNow = absoluteExpireTime ?? TimeSpan.FromSeconds(absoluteExpireTimeDefault);
-        options.SlidingExpiration = unusedExpireTime ?? TimeSpan.FromSeconds(slidingExpireTimeDefault);
+        options.AbsoluteExpirationRelativeToNow = absoluteExpireTime ?? TimeSpan.FromMinutes(absoluteExpireTimeDefault);
+        options.SlidingExpiration = unusedExpireTime ?? TimeSpan.FromMinutes(slidingExpireTimeDefault);
 
         var jsonData = JsonSerializer.Serialize(data);
 

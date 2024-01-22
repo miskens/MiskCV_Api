@@ -81,7 +81,7 @@ public class SkillRepository : ISkillRepository
 
     #region POST
 
-    public async Task<Skill?> CreateSkill(Skill skill, int companyId = 0, CancellationToken cancellationToken)
+    public async Task<Skill?> CreateSkill(Skill skill, CancellationToken cancellationToken, int companyId = 0)
     {
         if (_context.Skill == null || _context.Company == null) { return null; }
 

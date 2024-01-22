@@ -22,7 +22,7 @@ public class JwtService : IJwtService
         _audience = config["Jwt:Audience"]!;
     }
 
-    public string GenerateToken(IdentityUser user, List<string> roles, int expirationMinutes = 5) //TODO: Change to 30 min
+    public string GenerateToken(IdentityUser user, List<string> roles, int expirationMinutes = 30)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -52,18 +52,18 @@ public class JwtService : IJwtService
         return tokenHandler.WriteToken(token);
     }
 
-    public async Task<bool> IsTokenRevoked(string token)
+    public async Task<bool> IsTokenRevoked(string token, CancellationToken cancellationToken)
     {
-        var revokedTokens = await _cache.GetRecordAsync<string>(_revokedTokensKey);
+        var revokedTokens = await _cache.GetRecordAsync<string>(_revokedTokensKey, cancellationToken);
 
         var tokenList = JsonConvert.DeserializeObject<List<string>>(revokedTokens) ?? new List<string>();
 
         return tokenList.Contains(token);
     }
 
-    public async Task RevokeToken(string userId, string token)
+    public async Task RevokeToken(string userId, string token, CancellationToken cancellationToken)
     {
-        var revokedTokens = await _cache.GetRecordAsync<string>(_revokedTokensKey);
+        var revokedTokens = await _cache.GetRecordAsync<string>(_revokedTokensKey, cancellationToken);
 
         var tokenList = new List<string>();
         if (revokedTokens != null)
@@ -71,6 +71,6 @@ public class JwtService : IJwtService
 
         tokenList!.Add(token);
 
-        await _cache.SetRecordAsync(_revokedTokensKey, JsonConvert.SerializeObject(tokenList));
+        await _cache.SetRecordAsync(_revokedTokensKey, JsonConvert.SerializeObject(tokenList), cancellationToken);
     }
 }
