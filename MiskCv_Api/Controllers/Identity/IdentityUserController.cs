@@ -66,7 +66,6 @@ public class IdentityUserController: ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RegisterWithRole([FromBody] RegisterAdminDto registerAdminDto)
     {
-        var use = User.Identity;
         if ((registerAdminDto.Password != registerAdminDto.ConfirmPassword || registerAdminDto.Email.IsNullOrEmpty()))
         {
             return Problem("Email is empty or does not match confirm Email");
@@ -105,7 +104,7 @@ public class IdentityUserController: ControllerBase
 
     [HttpPost("Login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+    public async Task<IActionResult> Login([FromBody] LoginDto loginDto, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByNameAsync(loginDto.UserName);
 
@@ -129,7 +128,7 @@ public class IdentityUserController: ControllerBase
 
         if (token != null)
         {
-            await _cache.SetRecordAsync<string>($"Jwt_User_{user.Id}", token);
+            await _cache.SetRecordAsync<string>($"Jwt_User_{user.Id}", token, cancellationToken, TimeSpan.FromMinutes(30));
             return Ok(new { Token = token });
         }
 
@@ -143,7 +142,7 @@ public class IdentityUserController: ControllerBase
     [HttpPost]
     [Authorize]
     [Route("logout")]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         if (User == null) 
         { 
@@ -154,11 +153,11 @@ public class IdentityUserController: ControllerBase
 
         if (userId != null)
         {
-            var token = await _cache.GetRecordAsync<string>($"Jwt_User_{userId}");
+            var token = await _cache.GetRecordAsync<string>($"Jwt_User_{userId}", cancellationToken);
 
             await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
-            await _jwtservice.RevokeToken(userId, token);
+            await _jwtservice.RevokeToken(userId, token, cancellationToken);
 
             return Ok(new { message = "Logout successful" });
         }

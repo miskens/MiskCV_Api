@@ -36,7 +36,7 @@ public class AddressesController : ControllerBase
 
             if (addressModels == null)
             {
-                addressModels = await _addressRepository.GetAddresses();
+                addressModels = await _addressRepository.GetAddresses(cancellationToken);
 
                 if (addressModels != null)
                 {
