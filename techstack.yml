@@ -2,7 +2,7 @@ repo_name: miskens/MiskCv_Api
 report_id: 4299d1b613092a3f2c055d63a10b0365
 version: 0.1
 repo_type: Public
-timestamp: '2024-01-24T18:23:14+00:00'
+timestamp: '2024-02-29T19:37:44+00:00'
 requested_by: miskens
 provider: github
 branch: main
@@ -99,7 +99,7 @@ tools:
   last_updated_by: Misken
   last_updated_on: 2024-01-10 12:24:48.000000000 Z
 - name: Entity Framework Core
-  description: 'Lightweight and cross-platform version of the popular Entity Framework '
+  description: Lightweight and cross-platform version of the popular Entity Framework
   website_url: https://docs.microsoft.com/en-us/ef/core/
   version: 7.0.14
   license: MIT
