@@ -63,7 +63,6 @@ This is just a personal project where I create my CV and practice my skills and 
 - [X] Add Mapster and Map Entities to DTOs
 - [X] Add Redis
 - [X] Setup Azure Redis
-- [ ] Add Azure Application Insights logging
 - [X] Add and configure Azure App registration
 - [X] Setup Azure Key vault (for App registration secret)
 - [X] Set up Azure App Authentication and storing app token
@@ -71,8 +70,9 @@ This is just a personal project where I create my CV and practice my skills and 
 - [X] Add Microsoft Identity Platform and Jwtbearer Authentication
 - [X] Add Authorization to all endpoints 
 - [ ] Configure Docker
-- [ ] Continue with building frontend with React, RTK, Typescript in a project called MiskCv_React_RTK_TS
+- [ ] Continue with building frontend with React, RTK, Typescript
 - [ ] Configure and setup Azure webapps, app insights and whatnot
+- [ ] Add Azure Application Insights logging
 
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
 
